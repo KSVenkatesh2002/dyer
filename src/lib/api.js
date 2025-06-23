@@ -1,25 +1,34 @@
 import axios from 'axios';
 
+const baseURL =
+    typeof window === 'undefined'
+        ? process.env.NEXT_PUBLIC_API_URL
+        : '';
+
+// export const API = axios.create({
+//     baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // backend server URL
+// });
+
 export const API = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // backend server URL
+    baseURL: `${baseURL}/api`,
 });
 
 //employees router
 export const createEmployee = (data) => API.post('/employees', data);
 export const getEmployeeById = (employeeId) => API.get(`/employees/${employeeId}`);
 export const employeeListPage = () => API.get('/employees/time-based');
-export const editEmployee = ({employeeId, workType, data}) => API.put(`/employees/${workType}/${employeeId}`, data);
-export const deleteEmployee = ({employeeId, workType}) => API.delete(`/employees/${workType}/${employeeId}`);
+export const editEmployee = ({ employeeId, workType, data }) => API.put(`/employees/${workType}/${employeeId}`, data);
+export const deleteEmployee = ({ employeeId, workType }) => API.delete(`/employees/${workType}/${employeeId}`);
 export const getEmployeesListByJob = (job) => API.get(`/employees/list/${job}`);
 
 //attendances router
 export const attendanceDashboardDetailsFetch = (employeeId) => API.get(`/attendances/${employeeId}`);
 export const markAttendance = (data) => API.post('/attendances', data);
-export const clearAttendanceHistory = ({employeeId}) => API.delete(`/attendances/${employeeId}`);
+export const clearAttendanceHistory = ({ employeeId }) => API.delete(`/attendances/${employeeId}`);
 
 //payments router
-export const addPayment = ({data, job}) => API.post(`/payments/${job}`, data);
-export const getPaymentRecord = ({employeeId, workType}) => API.get(`/payments/${workType}?employeeId=${employeeId}` );
+export const addPayment = ({ data, job }) => API.post(`/payments/${job}`, data);
+export const getPaymentRecord = ({ employeeId, workType }) => API.get(`/payments/${workType}?employeeId=${employeeId}`);
 
 //clients
 export const createClient = (data) => API.post('/clients', data);
