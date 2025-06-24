@@ -22,10 +22,6 @@ export default function AsuWindingEmployeesList() {
             .finally(setLoading(false));
     }, []);
 
-    useEffect(() => {
-        console.log('[employees] :', employees);
-    }, [employees]);
-
     if (loading) {
         return (
             <p className='min-h-[calc(100vh-64px)] flex justify-center items-center'>
@@ -34,7 +30,7 @@ export default function AsuWindingEmployeesList() {
         );
     }
     if (!loading && (!employees || employees.length === 0)) {
-        return <NoData text={'No employees available'}/>
+        return <NoData text={'No employees available'} />
     }
 
     return (
@@ -54,24 +50,18 @@ export default function AsuWindingEmployeesList() {
                         {/* emp name */}
                         <Link
                             href={`/dashboard/task-based/${emp._id}`}
-                            // onClick={()=>handleClick(`/emp/${emp._id}`)}
                             className='text-md'
                         >
-                            {loading ? (
-                                <AiOutlineLoading3Quarters />
-                            ) : (
-                                <div className='text-lg font-semibold  capitalize'>
-                                    {emp.name}
-                                </div>
-                            )}
+                            <div className='text-lg font-semibold  capitalize'>
+                                {emp.name}
+                            </div>
                         </Link>
 
                         <Link
                             href={`/products/add/${emp._id}`}
-                            // onClick={()=>handleClick(`/emp/${emp._id}`)}
                             className='text-md border p-1.5 rounded-lg bg-accent/10 text-accent border-accent'
                         >
-                            Add Task
+                            Create Task
                         </Link>
                     </li>
 

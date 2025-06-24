@@ -2,12 +2,6 @@ import dbConnect from '@/lib/dbConnect';
 import { fetchUnassignedProducts } from '@/lib/products/fetchUnassignedProducts';
 import { auth } from '@clerk/nextjs/server';
 
-const fieldMap = {
-    winding: 'windingAssigned',
-    marking: 'markingAssigned',
-    chittam: 'chittamAssigned',
-};
-
 export async function GET(req) {
     try {
         await dbConnect();
@@ -21,10 +15,20 @@ export async function GET(req) {
         const page = parseInt(searchParams.get('page')) || 1;
         const limit = parseInt(searchParams.get('limit')) || 10;
 
-        const field = fieldMap[type];
+        let field;
 
-        if (!field) {
-            return new Response(JSON.stringify({ error: 'Invalid or missing type parameter' }), { status: 400 });
+        switch (type) {
+            case 'asu-winding':
+                field = 'windingAssigned'
+                break;
+            case 'asu-marking':
+                field = 'markingAssigned'
+                break;
+            case 'chittam':
+                field = 'chittamAssigned'
+                break;
+            default:
+                return new Response(JSON.stringify({ error: 'Invalid or missing type parameter' }), { status: 400 });
         }
 
         const result = await fetchUnassignedProducts({

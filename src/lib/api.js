@@ -39,8 +39,7 @@ export const getProductsUnassigned = (page, type) => API.get(`/products/unassign
 export const getProducts = (page, clientId) => API.get(`/products?page=${page}&limit=20&clientId=${clientId}`); 
 
 // task
-export const windingTask = (employeeId) => API.get(`/winding-task/${employeeId}`)
-export const markingTask = (data) => API.post('/marking-task', data);
+export const getTasks = (employeeId) => API.get(`/task/${employeeId}`)
 export const addTask = (data) => API.post('/task', data);
 
 // summary

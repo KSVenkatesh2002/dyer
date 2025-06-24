@@ -1,32 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getEmployeeDetailsById, paymentSummary, windingTask } from '@/lib/api';
+import { useParams } from 'next/navigation';
+import { getEmployeeDetailsById, getTasks, paymentSummary } from '@/lib/api';
 import Link from 'next/link';
 import NoData from '@/components/NoData';
-import {
-    BiSolidTrafficCone,
-} from "react-icons/bi";
-import {
-    GiNails, GiTakeMyMoney
-} from "react-icons/gi";
-import {
-    PiNumberEightLight,
-    PiMapPinSimpleAreaFill
-} from "react-icons/pi";
-import {
-    MdOutlineRepeat, MdDriveFileRenameOutline
-} from "react-icons/md";
-import { BsArrowCounterclockwise } from "react-icons/bs";
-import { LuTally5 } from "react-icons/lu";
-import { IoIosPerson } from "react-icons/io";
 import { ProductList } from '@/components/productList';
 
 export default function WindingEmployeeDashboard() {
     const { employeeId } = useParams();
-    const router = useRouter();
-
     const [employee, setEmployee] = useState(null);
     const [tasks, setTasks] = useState([]);
     const [selectedProductId, setSelectedProductId] = useState(null);
@@ -38,7 +20,7 @@ export default function WindingEmployeeDashboard() {
             try {
                 const [empRes, taskRes, sumRes] = await Promise.all([
                     getEmployeeDetailsById(employeeId),
-                    windingTask(employeeId),
+                    getTasks(employeeId),
                     paymentSummary(employeeId)
                 ]);
                 setEmployee(empRes.data);
@@ -53,6 +35,7 @@ export default function WindingEmployeeDashboard() {
     }, [employeeId]);
 
     if (loading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8" /> loading...</div>;
+
     if (!loading && !employee ) {
         return <NoData className="text-center text-error" text={'Employee not found.'} />
     }

@@ -18,12 +18,37 @@ export async function POST(req) {
         if (!productId || !employeeId || pays <= 0) {
             return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
         }
-        if(!assignList.includes(assign)){
+        if (!assignList.includes(assign)) {
             return new Response(JSON.stringify({ error: 'assign field not match' }), { status: 400 });
         }
 
         // Mark product as assigned
-        await Product.findOneAndUpdate({ _id:productId, createdBy: userId }, { [assign]: true });
+        await Product.findOneAndUpdate({ _id: productId, createdBy: userId }, { [assign]: true });
+
+        // 2. Fetch or Create EmployeeSummary
+        let summary = await EmployeeSummary.findOne({
+            employeeId,
+            createdBy: userId
+        });
+
+        if (!summary) {
+            summary = await EmployeeSummary.create({
+                employeeId,
+                createdBy: userId,
+                totalPaidAmount: 0,
+                totalUnpaidAmount: 0,
+                advancePay: 0
+            });
+        }
+
+        // Calculate unpaid amount after using advance
+        let remainingAmount = pays;
+        let usedAdvance = 0;
+
+        if (summary.advancePay > 0) {
+            usedAdvance = Math.min(summary.advancePay, pays);
+            remainingAmount = pays - usedAdvance;
+        }
 
         // Create the task
         await Task.create({
@@ -33,10 +58,15 @@ export async function POST(req) {
             createdBy: userId,
         });
 
+        // Update Summary
         await EmployeeSummary.findOneAndUpdate(
             { employeeId, createdBy: userId },
-            { $inc: { totalUnpaidAmount: Number(pays) } },
-            { new: true }
+            {
+                $inc: {
+                    totalUnpaidAmount: remainingAmount,
+                    advancePay: -usedAdvance
+                }
+            }
         );
 
         return new Response(null, { status: 204 });

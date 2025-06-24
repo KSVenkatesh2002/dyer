@@ -7,6 +7,7 @@ import Client from '@/models/client.model';
 import EmployeeSummary from '@/models/employeeSummary.model';
 import { generateSafeProductId } from '@/lib/products/utils';
 import { auth } from '@clerk/nextjs/server';
+import Employee from '@/models/employee.model';
 
 export async function POST(req) {
     await dbConnect();
@@ -35,12 +36,7 @@ export async function POST(req) {
     }
 
     try {
-        const productId = await generateSafeProductId(clientId, sariSection, userId);
-        const taskAmount = pays * numberOfSarees * repeat;
-
-        // 1. Create the Product
-        const product = await Product.create([{
-            productId,
+        const field = {
             sariSection,
             clientId,
             nailsCount,
@@ -50,9 +46,33 @@ export async function POST(req) {
             repeat,
             numberOfSarees,
             designName,
-            windingAssigned: true,
             createdBy: userId
-        }]);
+        }
+        const employeeJob = await Employee.findOne({ _id: employeeId, createdBy: userId })
+        if (!employeeJob) {
+            return new Response(JSON.stringify({ error: 'employee not found' }), { status: 400 });
+        }
+        switch (employeeJob.job) {
+            case 'asu-winding':
+                field.windingAssigned = true
+                break;
+            case 'asu-marking':
+                field.markingAssigned = true
+                break;
+            case 'chittam':
+                field.chittamAssigned = true
+                break;
+            default:
+                return new Response(JSON.stringify({ error: 'Invalid or missing job parameter' }), { status: 400 });
+        }
+
+        const productId = await generateSafeProductId(clientId, sariSection, userId);
+        field.productId = productId
+
+        const taskAmount = pays * numberOfSarees * repeat;
+
+        // 1. Create the Product
+        const product = await Product.create([field]);
 
         await Client.findOneAndUpdate(
             { _id: clientId, createdBy: userId },
