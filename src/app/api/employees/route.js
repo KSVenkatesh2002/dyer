@@ -37,7 +37,7 @@ export async function POST(req) {
         const phoneExist = await Employee.findOne({ phone, createdBy: userId });
         if (phoneExist) return NextResponse.json({ error: 'Phone already exists' }, {status: 401});
 
-        if (!['tying', 'dyeing', 'asu-marking', 'asu-winding'].includes(job)) {
+        if (!['tying', 'dyeing', 'asu-marking', 'asu-winding', 'chittam'].includes(job)) {
             return NextResponse.json({ error: 'Invalid job type' }, {status: 401});
         }
         if (!joinDate || isNaN(Date.parse(joinDate))) {
@@ -82,7 +82,7 @@ export async function POST(req) {
                 lastPaidDay: new Date(joinDate),
 
             }
-        } else if (['asu-marking', 'asu-winding'].includes(job)) {
+        } else if (['asu-marking', 'asu-winding', 'chittam'].includes(job)) {
             newEmployeeSummaryField = {
                 employeeId: savedEmployee._id,
 

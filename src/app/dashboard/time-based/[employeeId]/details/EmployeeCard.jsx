@@ -25,7 +25,6 @@ export default function EmployeeCard({ employee, onUpdate, onClearHistory }) {
 
     // Detect screen size to enable proper behavior
     useEffect(() => {
-        console.log('employee', employee)
         const checkScreenSize = () => {
             setIsMobile(window.innerWidth < 640);
         };
@@ -68,7 +67,7 @@ export default function EmployeeCard({ employee, onUpdate, onClearHistory }) {
     const router = useRouter();
 
     const handleDeleteEmployee = async (employeeId) => {
-        console.log('deleteEmployee', employeeId);
+        console.log('deleteEmployee');
         try {
             await deleteEmployee({employeeId, workType:'time-based'});
             toast.success('Employee deleted successfully!', { theme: 'light' });

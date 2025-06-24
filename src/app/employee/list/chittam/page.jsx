@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { addTask, getEmployeesListByJob, getProductsUnassigned, markingTask } from '@/lib/api';
 import { toast } from 'react-toastify';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import Link from 'next/link';
+import Link from 'next/link'; 
 import NoData from '@/components/NoData';
 
 export default function AsuMarkingEmployeesList() {
-    const job = 'asu-marking';
+    const job = 'chittam';
     const [employees, setEmployees] = useState([]);
     const [products, setProducts] = useState([]);
     const [page, setPage] = useState(1);
@@ -24,7 +24,7 @@ export default function AsuMarkingEmployeesList() {
         setLoadingProducts(true);
 
         try {
-            const res = await getProductsUnassigned(pageNum, 'marking');
+            const res = await getProductsUnassigned(pageNum, 'chittam');
             const { products: newProducts, hasMore: more } = res.data;
 
             setProducts(prev => reset ? newProducts : [...prev, ...newProducts]); // ✅ handle reset
@@ -45,7 +45,7 @@ export default function AsuMarkingEmployeesList() {
             try {
                 const empRes = await getEmployeesListByJob(job);
                 setEmployees(empRes.data);
-
+                
                 setHasMore(true);
                 await fetchProducts(1, true);
             } catch (err) {
@@ -75,7 +75,7 @@ export default function AsuMarkingEmployeesList() {
                 productId: selectedProduct._id,
                 employeeId: selectedEmployeeId,
                 pays: Number(pays),
-                assign: 'markingAssigned'
+                assign: 'chittamAssigned'
             });
 
             toast.success('Task assigned successfully!');
@@ -93,9 +93,9 @@ export default function AsuMarkingEmployeesList() {
                 setProducts(prev => prev.filter(p => p._id !== selectedProduct._id));
             }
 
-        } catch (err) {
-            toast.error('Failed to assign task');
-            console.error(err);
+        } catch (error) {
+            toast.error( error.response.data.error || 'Failed to assign task');
+            console.error(error);
         }
     };
 
@@ -114,14 +114,14 @@ export default function AsuMarkingEmployeesList() {
     }
 
     if (!loadingPage && (!employees || employees.length === 0)) {
-        return <NoData text={'No employees available'} />
+        return <NoData text={'No employees available'}/>
     }
 
     return (
         <>
             <div className="py-8 max-w-3xl mx-auto w-full space-y-4 px-4">
                 <div className='text-2xl font-bold mb-4 capitalize'>
-                    Asu Marking Employees List
+                    chittam Employees List
                 </div>
 
                 <ul className="space-y-4">
@@ -150,7 +150,7 @@ export default function AsuMarkingEmployeesList() {
                 {hasMore && (
                     <div className="text-center mt-4">
                         <button className="btn-secondary" onClick={() => fetchProducts()} disabled={loadingProducts}>
-                            {loadingProducts ? 'Loading...' : 'More'}
+                            {loadingProducts ? '...' : 'More'}
                         </button>
                     </div>
                 )}

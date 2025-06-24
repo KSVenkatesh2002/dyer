@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getEmployeeById, paymentSummary, windingTask } from '@/lib/api';
+import { getEmployeeDetailsById, paymentSummary, windingTask } from '@/lib/api';
 import Link from 'next/link';
+import NoData from '@/components/NoData';
 import {
     BiSolidTrafficCone,
 } from "react-icons/bi";
@@ -20,6 +21,7 @@ import {
 import { BsArrowCounterclockwise } from "react-icons/bs";
 import { LuTally5 } from "react-icons/lu";
 import { IoIosPerson } from "react-icons/io";
+import { ProductList } from '@/components/productList';
 
 export default function WindingEmployeeDashboard() {
     const { employeeId } = useParams();
@@ -35,7 +37,7 @@ export default function WindingEmployeeDashboard() {
         (async () => {
             try {
                 const [empRes, taskRes, sumRes] = await Promise.all([
-                    getEmployeeById(employeeId),
+                    getEmployeeDetailsById(employeeId),
                     windingTask(employeeId),
                     paymentSummary(employeeId)
                 ]);
@@ -51,7 +53,9 @@ export default function WindingEmployeeDashboard() {
     }, [employeeId]);
 
     if (loading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8" /> loading...</div>;
-    if (!employee) return <p className="text-center text-error">Employee not found.</p>;
+    if (!loading && !employee ) {
+        return <NoData className="text-center text-error" text={'Employee not found.'} />
+    }
 
     return (
         <div className="p-6 space-y-6 max-w-4xl mx-auto">
@@ -85,12 +89,12 @@ export default function WindingEmployeeDashboard() {
             </div>
 
             {/* Products List */}
-            <section className="bg-surface rounded-lg p-4 shadow">
+            {/* <section className="bg-surface rounded-lg p-4 shadow">
                 <h2 className="text-lg font-semibold mb-4">Assigned Products</h2>
                 {tasks.length === 0 ? (
                     <p className="text-mutedText">No products assigned yet.</p>
                 ) : (
-                    <ul className="space-y-4">
+                    <ul className="space-y-4"> 
                         {tasks.map(task => {
                             const product = task.productId;
                             const isSelected = selectedProductId === product._id;
@@ -123,7 +127,15 @@ export default function WindingEmployeeDashboard() {
                         })}
                     </ul>
                 )}
-            </section>
+            </section> */}
+            <ProductList
+                title="Assigned Products"
+                items={tasks}
+                isTaskList={true}
+                selectedProductId={selectedProductId}
+                setSelectedProductId={setSelectedProductId}
+            />
+
         </div>
     );
 }

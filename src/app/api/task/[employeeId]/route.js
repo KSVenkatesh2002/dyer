@@ -19,8 +19,5 @@ export async function GET(req, { params }) {
         })
         .lean();
 
-    console.log(tasks);
-
-
     return new Response(JSON.stringify(tasks), { status: 200 });
 }

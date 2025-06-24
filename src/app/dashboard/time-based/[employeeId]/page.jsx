@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import { useParams } from 'next/navigation'
-import { markAttendance, attendanceDashboardDetailsFetch, editEmployee, clearAttendanceHistory } from '@/lib/api';
+import { markAttendance, editEmployee, clearAttendanceHistory, getSummaryTimeBased, getEmployeeDetailsById } from '@/lib/api';
 import AttendanceCalendar from '../components/AttendanceCalendar'
-// import Payment from './payment/Payment'
 import Details from './details/Details'
 import EmployeeSkeletonPage from './loading';
 import PaymentNavButton from '../components/PaymentNavButton'
@@ -13,19 +12,18 @@ import PaymentNavButton from '../components/PaymentNavButton'
 // add employee id in employee object -- done
 // add delete employee functionality in employeeCard -- done
 // navigate to employee list page after deleting employee by using useRouter as pop path in stack -- done
-// handle last paid day in attendance calendar
+// handle last paid day in attendance calendar -- done
 
 
 //payment
-// add new payment record into payment record list which is got from api
-// fetch last few payment records from api
-// change color to the 'no payment record text' in payment record list
+// add new payment record into payment record list which is got from api -- done
+// fetch last few payment records from api -- done
+// change color to the 'no payment record text' in payment record list -- done
 
 //attendance
 // add clear attendance for specific date
-// add holiday status in attendance calendar
-// fetch attendance by month wise, previous month and next month
-// move payment record useState to parent component because to update new payment record to payment record list
+// add holiday status in attendance calendar -- done
+// fetch attendance by month wise, previous month and next month -- done
 
 //details
 // add field in employee details which is say that what work is assigned to this employee
@@ -34,13 +32,12 @@ import PaymentNavButton from '../components/PaymentNavButton'
 
 //new employee
 // change color
-// new field which is say that what work is assigned to this employee
+// new field which is say that what work is assigned to this employee -- done
 
 
 export default function AttendanceLogPage() {
     const params = useParams()
     const employeeId = params.employeeId
-    // const [paymentLoading, setPaymentLoading] = useState(false)
     const [pageLoading, setPageLoading] = useState(true)
     const [attendanceLoading, setAttendanceLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -65,38 +62,36 @@ export default function AttendanceLogPage() {
         advancePay: 0,
         lastPaidDay: null,
     })
-    // const [paymentRecord, setPaymentRecord] = useState([]);
 
     useEffect(() => {
         async function pageLoad() {
             try {
-                const res = await attendanceDashboardDetailsFetch(employeeId)
-                const data = res.data
-                console.log('attendanceDashboardDetailsFetch response employee: ', data)
-                console.log(data.employee.employeeId, data.employee.name, data.employee.phone, data.employee.joinDate, data.employee.salaryPerDay)
+                const employeeRes = await getEmployeeDetailsById(employeeId)
+                const employeeDetails = employeeRes.data
                 setEmployee({
-
-                    employeeId: data.employee.employeeId,
-                    name: data.employee.name,
-                    phone: data.employee.phone,
-                    joinDate: data.employee.joinDate,
-                    salaryPerDay: data.employee.salaryPerDay,
-                    job: data.employee.job,
-
+                    employeeId: employeeDetails.employeeId,
+                    name: employeeDetails.name,
+                    phone: employeeDetails.phone,
+                    joinDate: employeeDetails.joinDate,
+                    salaryPerDay: employeeDetails.salaryPerDay,
+                    job: employeeDetails.job,
                 })
+
+                const summaryRes = await getSummaryTimeBased(employeeId)
+                const summary = summaryRes.data
                 setAttendanceSummary({
-                    totalUnpaidAmount: data.totalUnpaidAmount,
-                    unpaidFullDays: data.unpaidFullDays,
-                    unpaidHalfDays: data.unpaidHalfDays,
-                    totalFullDays: data.totalFullDays,
-                    totalHalfDays: data.totalHalfDays,
-                    totalAbsentDays: data.totalAbsentDays,
-                    totalPaidAmount: data.totalPaidAmount,
-                    unpaidPartialAmount: data.unpaidPartialAmount,
-                    advancePay: data.advancePay,
-                    lastPaidDay: data.lastPaidDay,
+                    totalUnpaidAmount: summary.totalUnpaidAmount,
+                    unpaidFullDays: summary.unpaidFullDays,
+                    unpaidHalfDays: summary.unpaidHalfDays,
+                    totalFullDays: summary.totalFullDays,
+                    totalHalfDays: summary.totalHalfDays,
+                    totalAbsentDays: summary.totalAbsentDays,
+                    totalPaidAmount: summary.totalPaidAmount,
+                    unpaidPartialAmount: summary.unpaidPartialAmount,
+                    advancePay: summary.advancePay,
+                    lastPaidDay: summary.lastPaidDay,
                 })
-                setAttendance(data.attendanceRecords)
+
             } catch (err) {
                 toast.error(err.response.data.message || 'error fetching employee data', { theme: 'light' });
                 setError(err.response.data.message || 'error fetching employee data');
@@ -105,7 +100,7 @@ export default function AttendanceLogPage() {
             }
         }
         pageLoad()
-    }, [employeeId])
+    }, [])
 
     const handleAttendanceChange = async (date, status) => {
         console.log('handleAttendanceChange', date)
@@ -155,22 +150,22 @@ export default function AttendanceLogPage() {
     const handleEmployeeProfileUpdate = (updatedData) => {
         // console.log('handleEmployeeProfileUpdate', {employeeId, workType:'time-based', data:{ ...updatedData, employeeId }})
 
-        editEmployee({employeeId, workType:'time-based', data:{ ...updatedData, employeeId }})
-        .then((res) => {
-            const data = res.data;
-            setEmployee(prev => ({
-                ...prev,
-                name: data.employee.name,
-                phone: data.employee.phone,
-                salaryPerDay: data.employee.salaryPerDay
-            }))
-            toast.success('Employee profile updated successfully!', { theme: 'light' });
-        })
-        .catch((err) => {
-            console.error('Error updating employee profile:', err);
-            setError(err.response?.data?.message || 'Error updating employee profile');
-            toast.error(err.response?.data?.message || 'Error updating employee profile', { theme: 'light' });
-        })
+        editEmployee({ employeeId, workType: 'time-based', data: { ...updatedData, employeeId } })
+            .then((res) => {
+                const data = res.data;
+                setEmployee(prev => ({
+                    ...prev,
+                    name: data.employee.name,
+                    phone: data.employee.phone,
+                    salaryPerDay: data.employee.salaryPerDay
+                }))
+                toast.success('Employee profile updated successfully!', { theme: 'light' });
+            })
+            .catch((err) => {
+                console.error('Error updating employee profile:', err);
+                setError(err.response?.data?.message || 'Error updating employee profile');
+                toast.error(err.response?.data?.message || 'Error updating employee profile', { theme: 'light' });
+            })
     }
     const handleClearHistory = async (employeeId) => {
         console.log('handleClearHistory')
@@ -190,10 +185,10 @@ export default function AttendanceLogPage() {
                     lastPaidDay: null,
                 })
                 toast.success('attendance history cleared', { theme: 'light' });
-            }).catch((error)=>{
+            }).catch((error) => {
                 console.log(error);
                 toast.error(error.response?.data?.error || 'Unable to clear, Try after sometime', { theme: 'light' });
-                
+
             })
 
         } catch (err) {
@@ -217,17 +212,18 @@ export default function AttendanceLogPage() {
                 attendanceSummary={attendanceSummary}
                 onEmployeeProfileUpdate={handleEmployeeProfileUpdate}
                 onClearHistory={handleClearHistory}
-            // onDeleteEmployee={handleDeleteEmployee}
             />
 
             <AttendanceCalendar
+                employeeId={employeeId}
                 attendance={attendance}
+                setAttendance={setAttendance}
                 joinDate={employee.joinDate}
                 onAttendanceChange={handleAttendanceChange}
                 lastPaidDay={attendanceSummary.lastPaidDay}
             />
 
-            <PaymentNavButton employeeId={employeeId} job={employee.job}/>
+            <PaymentNavButton employeeId={employeeId} job={employee.job} />
 
         </div>
     )

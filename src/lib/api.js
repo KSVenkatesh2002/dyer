@@ -5,28 +5,24 @@ const baseURL =
         ? process.env.NEXT_PUBLIC_API_URL
         : '';
 
-// export const API = axios.create({
-//     baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // backend server URL
-// });
-
 export const API = axios.create({
     baseURL: `${baseURL}/api`,
 });
 
 //employees router
 export const createEmployee = (data) => API.post('/employees', data);
-export const getEmployeeById = (employeeId) => API.get(`/employees/${employeeId}`);
+export const getEmployeeDetailsById = (employeeId) => API.get(`/employees/${employeeId}`);
 export const employeeListPage = () => API.get('/employees/time-based');
 export const editEmployee = ({ employeeId, workType, data }) => API.put(`/employees/${workType}/${employeeId}`, data);
 export const deleteEmployee = ({ employeeId, workType }) => API.delete(`/employees/${workType}/${employeeId}`);
 export const getEmployeesListByJob = (job) => API.get(`/employees/list/${job}`);
 
-//attendances router
-export const attendanceDashboardDetailsFetch = (employeeId) => API.get(`/attendances/${employeeId}`);
+//attendances
+export const getAttendanceRecord = (employeeId, month, year) => API.get(`/attendances/${employeeId}?month=${month}&year=${year}`);
 export const markAttendance = (data) => API.post('/attendances', data);
 export const clearAttendanceHistory = ({ employeeId }) => API.delete(`/attendances/${employeeId}`);
 
-//payments router
+//payments
 export const addPayment = ({ data, job }) => API.post(`/payments/${job}`, data);
 export const getPaymentRecord = ({ employeeId, workType }) => API.get(`/payments/${workType}?employeeId=${employeeId}`);
 
@@ -37,13 +33,16 @@ export const getAllClients = () => API.get('/clients');
 export const getClientDetails = (clientId) => API.get(`/clients/${clientId}`);
 
 // products
+export const createProduct = (data) => API.post('/products', data);
 export const createProductWithTask = (data) => API.post('/products/with-task', data);
-export const getProductsMarkingUnassigned = (page) => API.get(`/products/marking-unassigned?page=${page}&limit=10`);
-export const getProducts = (page, clientId) => API.get(`/products?page=${page}&limit=20&clientId=${clientId}`);
+export const getProductsUnassigned = (page, type) => API.get(`/products/unassigned?type=${type}&page=${page}&limit=10`);
+export const getProducts = (page, clientId) => API.get(`/products?page=${page}&limit=20&clientId=${clientId}`); 
 
 // task
 export const windingTask = (employeeId) => API.get(`/winding-task/${employeeId}`)
 export const markingTask = (data) => API.post('/marking-task', data);
+export const addTask = (data) => API.post('/task', data);
 
 // summary
 export const paymentSummary = (employeeId) => API.get(`/summary/task-based/${employeeId}`)
+export const getSummaryTimeBased = (employeeId) => API.get(`/summary/time-based/${employeeId}`)

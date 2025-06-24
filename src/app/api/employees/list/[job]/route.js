@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import { jsonResponse, errorResponse } from '@/lib/response';
 import Employee from '@/models/employee.model';
-import EmployeeSummary from '@/models/employeeSummary.model';
 import { auth } from '@clerk/nextjs/server';
 
 // return employees list based on job

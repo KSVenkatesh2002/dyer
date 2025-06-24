@@ -2,12 +2,6 @@
 import mongoose from 'mongoose';
 
 const taskSchema = new mongoose.Schema({
-    // productId: {
-    //     type: String,
-    //     ref: 'Product',
-    //     required: true,
-    //     unique: true
-    // },
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',

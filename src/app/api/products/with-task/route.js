@@ -1,8 +1,8 @@
 import dbConnect from '@/lib/dbConnect';
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 import Product from '@/models/product.model';
 import Task from '@/models/task.model';
-import Employee from '@/models/employee.model';
+// import Employee from '@/models/employee.model';
 import Client from '@/models/client.model';
 import EmployeeSummary from '@/models/employeeSummary.model';
 import { generateSafeProductId } from '@/lib/products/utils';
@@ -35,8 +35,8 @@ export async function POST(req) {
     }
 
     try {
-        const productId = await generateSafeProductId(clientId, sariSection);
-        const taskAmount = pays * numberOfSarees;
+        const productId = await generateSafeProductId(clientId, sariSection, userId);
+        const taskAmount = pays * numberOfSarees * repeat;
 
         // 1. Create the Product
         const product = await Product.create([{

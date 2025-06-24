@@ -4,23 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import {
-    BiSolidTrafficCone,
-} from "react-icons/bi";
-import {
-    GiNails, GiTakeMyMoney
-} from "react-icons/gi";
-import {
-    PiNumberEightLight,
-    PiMapPinSimpleAreaFill
-} from "react-icons/pi";
-import {
-    MdOutlineRepeat, MdDriveFileRenameOutline
-} from "react-icons/md";
-import { BsArrowCounterclockwise } from "react-icons/bs";
-import { LuTally5 } from "react-icons/lu";
 
 import { getClientDetails, getProducts } from '@/lib/api';
+import { ProductList } from '@/components/productList';
 
 export default function ClientDetailsPage() {
     const params = useParams();
@@ -59,7 +45,6 @@ export default function ClientDetailsPage() {
             try {
                 const clientRes = await getClientDetails(clientId)
                 setClient(clientRes.data)
-                console.log('clientId', clientId);
 
                 await fetchProducts(1, true);
             } catch (err) {
@@ -90,7 +75,7 @@ export default function ClientDetailsPage() {
         <div className="p-6 space-y-6 max-w-xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-800">Client Details</h1>
 
-            <div className="border rounded-lg p-4 bg-white shadow-sm space-y-4">
+            <div className="border text-white rounded-lg p-4 bg-background/50 shadow-sm space-y-4">
                 <DetailRow label="Name" value={client.name} />
                 <DetailRow label="Phone" value={client.phone} />
                 <DetailRow label="Address" value={client.address || 'N/A'} />
@@ -114,44 +99,13 @@ export default function ClientDetailsPage() {
                     }
                 />
             </div>
-            {/* Products List */}
-            <section className="bg-surface rounded-lg p-4 shadow">
-                <h2 className="text-lg font-semibold mb-4">Products</h2>
-                {products.length === 0 ? (
-                    <p className="text-mutedText">No products ordered.</p>
-                ) : (
-                    <ul className="space-y-4">
-                        {products.map(product => {
-                            const isSelected = selectedProductId === product._id;
-                            return (
-                                <li key={product._id}>
-                                    <button
-                                        onClick={() => setSelectedProductId(isSelected ? null : product._id)}
-                                        className="w-full bg-accent/30 px-4 py-3 rounded-md flex justify-between items-center font-semibold transition"
-                                    >
-                                        {product.productId}
-                                    </button>
+            <ProductList
+                title="Products"
+                items={products}
+                selectedProductId={selectedProductId}
+                setSelectedProductId={setSelectedProductId}
+            />
 
-                                    {isSelected && (
-                                        <div className="mt-2 border border-muted rounded p-4 bg-background/30  text-sm grid grid-cols-2 gap-4">
-                                            <p className="flex items-center gap-2"><PiMapPinSimpleAreaFill /> <strong>Sari Section:</strong> {product.sariSection}</p>
-                                            <p className="flex items-center gap-2"><GiNails /> <strong>Nails Count:</strong> {product.nailsCount}</p>
-                                            <p className="flex items-center gap-2"><BiSolidTrafficCone /> <strong>Cones Used:</strong> {product.conesUsed}</p>
-                                            <p className="flex items-center gap-2"><PiNumberEightLight className='rotate-90' /> <strong>Kolukkulu:</strong> {product.kolukkulu}</p>
-                                            <p className="flex items-center gap-2"><MdOutlineRepeat /> <strong>Varasalu:</strong> {product.varasalu}</p>
-                                            <p className="flex items-center gap-2"><BsArrowCounterclockwise /> <strong>Repeat:</strong> {product.repeat}</p>
-                                            <p className="flex items-center gap-2"><LuTally5 /> <strong>Sarees:</strong> {product.numberOfSarees}</p>
-                                            <p className="flex items-center gap-2"><MdDriveFileRenameOutline /> <strong>Design Name:</strong> {product.designName || "N/A"}</p>
-                                            {product.windingAssigned && <p className="flex items-center gap-2"> <strong> winding Assigned</strong> </p>}
-                                            {product.markingAssigned && <p className="flex items-center gap-2"> <strong>Marking Assigned</strong> </p>}
-                                        </div>
-                                    )}
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-            </section>
             {hasMore && (
                 <div className="text-center mt-4">
                     <button className="btn-secondary" onClick={() => fetchProducts()} disabled={loadingProducts}>

@@ -21,7 +21,7 @@ const employeeSchema = new mongoose.Schema({
     job: {
         type: String,
         required: true,
-        enum: ['tying', 'dyeing', 'asu-marking', 'asu-winding'], // ✅ match client
+        enum: ['tying', 'dyeing', 'asu-marking', 'asu-winding', 'chittam'],
     },
     salaryPerDay: {
         type: Number,

@@ -1,7 +1,8 @@
 'use client'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { toast } from 'react-toastify';
+import { getAttendanceRecord } from '@/lib/api';
 
 // set changing attendance status should not done before last paid date : done
 // set changing attendance status should not done before joining date : done
@@ -10,18 +11,31 @@ import { toast } from 'react-toastify';
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function AttendanceCalendar({ attendance, onAttendanceChange, joinDate, lastPaidDay }) {
+export default function AttendanceCalendar({ employeeId, attendance, setAttendance, onAttendanceChange, joinDate, lastPaidDay }) {
     const [currentDate, setCurrentDate] = useState(dayjs())
     const [attendanceMarkLoading, setAttendanceMarkLoading] = useState([])
     const [showPicker, setShowPicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
 
+    useEffect(() => {
+        const fetchAttendance = async () => {
+            const month = currentDate.month() + 1; // dayjs: 0-based
+            const year = currentDate.year();
+            try {
+                const attendanceRes = await getAttendanceRecord(employeeId, month, year);
+                setAttendance(attendanceRes.data);
+            } catch (err) {
+                toast.error('Failed to fetch attendance');
+            }
+        };
+
+        fetchAttendance();
+    }, [currentDate]);
+
     const closePopup = () => {
         setShowPicker(false);
         setSelectedDate('');
     };
-
-
 
     const handleAttendanceChange = async (date, status) => {
         setAttendanceMarkLoading(prev => [...prev, date])
@@ -44,6 +58,7 @@ export default function AttendanceCalendar({ attendance, onAttendanceChange, joi
                     <p className='font-semibold text-text/60'>{selectedDate}</p>
                     <p id="popupDesc" className='p-2 bg-surface/50 rounded-lg'>if employee have advance amount then you can change attendance in future</p>
 
+                    {/* attendance status button */}
                     <div className="flex min-w-full rounded-lg overflow-hidden shadow shadow-gray-700">
                         {['present', 'half', 'absent', 'holiday'].map((status) => (
                             <button
@@ -60,9 +75,10 @@ export default function AttendanceCalendar({ attendance, onAttendanceChange, joi
                         ))}
                     </div>
 
+                    {/* cancel button */}
                     <div className='flex flex-wrap justify-evenly items-baseline'>
 
-                        <button className="w-1/2 rounded-md p-2 text-center text-sm text-gray-200 bg-gray-800 capitalize">remove entry</button>
+                        {/* <button className="w-1/2 rounded-md p-2 text-center text-sm text-gray-200 bg-gray-800 capitalize">remove entry</button> */}
                         <button
                             className="w-1/2  text-center text-sm text-gray-800 underline "
                             onClick={() => { closePopup() }}

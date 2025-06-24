@@ -2,9 +2,8 @@ import mongoose from 'mongoose';
 
 const counterSchema = new mongoose.Schema({
     key: {
-        type: String,
-        required: true,
-        unique: true, // e.g., `mani-pallu`, `mani-body`
+        type: String, // e.g., `mani-pallu`, `mani-body`
+        required: true, 
     },
     seq: {
         type: Number,
@@ -15,5 +14,10 @@ const counterSchema = new mongoose.Schema({
         required: true
     },
 });
+
+counterSchema.index({ 
+    key: 1, 
+    createdBy: 1,
+}, { unique: true });
 
 export default mongoose.models.Counter || mongoose.model('Counter', counterSchema);

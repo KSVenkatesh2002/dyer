@@ -51,6 +51,10 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    chittamAssigned: {
+        type: Boolean,
+        default: false
+    },
     createdBy: {
         type: String,
         required: true

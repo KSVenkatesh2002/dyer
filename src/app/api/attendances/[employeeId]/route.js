@@ -7,33 +7,32 @@ import Attendance from '@/models/attendance.model';
 import EmployeeSummary from '@/models/employeeSummary.model';
 import PaymentRecord from '@/models/paymentRecord.model';
 import { NextResponse } from 'next/server';
-//attendanceDashboardDetailsFetch
+
+// get attendance records
 export async function GET(req, { params }) {
     try {
         await dbConnect();
         const { userId } = await auth();
-        const { employeeId } = await params;
+        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const { employeeId } = await params;
+        const url = new URL(req.url);
+        const month = parseInt(url.searchParams.get('month')); // 1–12
+        const year = parseInt(url.searchParams.get('year'));
 
         if (!mongoose.Types.ObjectId.isValid(employeeId)) {
             return NextResponse.json({ error: 'Invalid employee ID' }, { status: 400 });
         }
 
-        const employee = await Employee.findOne({ _id: employeeId, createdBy: userId }).lean();
-        if (!employee) {
-            return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+        const query = { employeeId, createdBy: userId };
+
+        if (!isNaN(month) && !isNaN(year)) {
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 0, 23, 59, 59); // end of month
+            query.date = { $gte: start, $lte: end };
         }
 
-        if (!['tying', 'dyeing'].includes(employee.job)) {
-            return NextResponse.json({ error: 'This employee job is not time-based' }, { status: 400 });
-        }
-
-        const summary = await EmployeeSummary.findOne({ employeeId, createdBy: userId });
-
-        const attendanceRecords = await Attendance.find({ employeeId, createdBy: userId })
+        const attendanceRecords = await Attendance.find(query)
             .select('date status paid partialPay -_id')
             .sort({ date: 1 })
             .lean();
@@ -41,30 +40,10 @@ export async function GET(req, { params }) {
         const formattedRecords = attendanceRecords.map(record => ({
             date: record.date.toISOString().split('T')[0],
             status: record.status,
-            paid: record.paid
+            paid: record.paid,
         }));
 
-        return NextResponse.json({
-            employee: {
-                employeeId: employee._id,
-                name: employee.name,
-                phone: employee.phone,
-                joinDate: employee.joinDate,
-                salaryPerDay: employee.salaryPerDay,
-                job: employee.job,
-            },
-            totalUnpaidAmount: summary?.totalUnpaidAmount || 0,
-            totalFullDays: summary?.totalFullDays || 0,
-            totalHalfDays: summary?.totalHalfDays || 0,
-            totalAbsentDays: summary?.totalAbsentDays || 0,
-            unpaidFullDays: summary?.unpaidFullDays || 0,
-            unpaidHalfDays: summary?.unpaidHalfDays || 0,
-            unpaidPartialAmount: summary?.unpaidPartialAmount || 0,
-            totalPaidAmount: summary?.totalPaidAmount || 0,
-            advancePay: summary?.advancePay || 0,
-            lastPaidDay: summary?.lastPaidDay || null,
-            attendanceRecords: formattedRecords
-        }, { status: 200 });
+        return NextResponse.json(formattedRecords, { status: 200 });
 
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 400 });

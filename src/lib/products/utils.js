@@ -2,7 +2,7 @@ import Counter from '@/models/counter.model';
 import Client from '@/models/client.model';
 
 export async function generateSafeProductId(clientId, sariSection, createdBy) {
-    const client = await Client.findById(clientId).lean();
+    const client = await Client.findOne({_id: clientId, createdBy}).lean();
     if (!client) throw new Error('Client not found');
 
     const clientName = client.name.toLowerCase().replace(/\s+/g, '-');

@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 
-const workTypes = ['tying', 'dyeing', 'asu-marking', 'asu-winding']; // Assuming this is the service to handle the API call
+const workTypes = ['tying', 'dyeing', 'asu-marking', 'asu-winding', 'chittam']; // Assuming this is the service to handle the API call
 
 export default function AddEmployeePage() {
     const [form, setForm] = useState({

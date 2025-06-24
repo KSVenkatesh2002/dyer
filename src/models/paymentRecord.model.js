@@ -6,10 +6,11 @@ const paymentRecordSchema = new mongoose.Schema({
         ref: 'Employee',
         required: true,
     },
+
     // jobType: {
     //     type: String, 
     //     enum: ['daily', 'winding', 'marking'], 
-    //     required: true 
+    //     requied: true 
     // },
     amountPaid: {
         type: Number,

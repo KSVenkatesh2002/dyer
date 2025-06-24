@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Product from '@/models/product.model';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { generateSafeProductId } from '@/lib/products/utils';
 
 export async function GET(req) {
     try {
@@ -18,7 +19,7 @@ export async function GET(req) {
         const limit = parseInt(searchParams.get('limit')) || 20;
         const clientId = searchParams.get('clientId');
         const skip = (page - 1) * limit;
-        
+
         if (!mongoose.Types.ObjectId.isValid(clientId)) {
             return NextResponse.json({ error: 'Invalid clientId format' });
         }
@@ -30,7 +31,7 @@ export async function GET(req) {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('productId createdAt nailsCount kolukkulu varasalu repeat numberOfSarees windingAssigned markingAssigned sariSection conesUsed');
+            .select('productId createdAt nailsCount kolukkulu varasalu repeat numberOfSarees windingAssigned markingAssigned chittamAssigned sariSection conesUsed');
 
         const totalCount = await Product.countDocuments({
             clientId,
@@ -45,8 +46,60 @@ export async function GET(req) {
             }),
             { status: 200 }
         );
-    } catch (err) {
-        console.error('[FETCH_UNASSIGNED_PRODUCTS]', err);
-        return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });
+    } catch (error) {
+        console.error('[FETCH_UNASSIGNED_PRODUCTS]', error);
+        return new Response(JSON.stringify({ error: error.message || 'Server error' }), { status: 500 });
+    }
+}
+
+export async function POST(req) {
+    try {
+        await dbConnect();
+        const { userId } = await auth();
+
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const {
+            sariSection,
+            clientId,
+            nailsCount,
+            conesUsed,
+            kolukkulu,
+            varasalu,
+            repeat,
+            numberOfSarees,
+            designName
+        } = await req.json();
+
+        if (!clientId || !sariSection) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        const productId = await generateSafeProductId(clientId, sariSection, userId);
+
+        const newProduct = await Product.create({
+            productId,
+            sariSection,
+            clientId,
+            nailsCount,
+            conesUsed,
+            kolukkulu,
+            varasalu,
+            repeat,
+            numberOfSarees,
+            designName,
+            windingAssigned: false,
+            markingAssigned: false,
+            chittamAssigned: false,
+            createdBy: userId
+        });
+
+        return NextResponse.json({ success: true, productId: newProduct.productId }, { status: 201 });
+
+    } catch (error) {
+        console.error('[CREATE_PRODUCT_ERROR]', error);
+        return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
     }
 }

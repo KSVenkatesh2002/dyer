@@ -2,21 +2,25 @@
 import React from 'react'
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from "next/image";
-import tying from '../../public/tying.jpg'
+import tyingBgPic from '../../public/tying.jpg'
+import windingBgPic from '../../public/asu-winding.webp'
+import chittamBgPic from '../../public/chittam.jpeg'
+import productBgPic from '../../public/product.jpg'
+import clientBgPic from '../../public/client.webp'
+
 
 const workItems = [
     {
         name: 'Tying / Dyeing',
         purpose: 'Record daily attendance for Tying and Dyeing workers',
         href: '/employee/attendance/tying-dyeing-workers',
-        bgUrl: tying
+        bgUrl: tyingBgPic
     },
     {
         name: 'Asu Winding',
         purpose: 'add Asu Winding tasks for Winding workers',
         href: '/employee/list/asu-winding',
-        bgUrl: '/'
+        bgUrl: windingBgPic
     },
     {
         name: 'Asu Marking',
@@ -25,16 +29,22 @@ const workItems = [
         bgUrl: '/'
     },
     {
+        name: 'chittam',
+        purpose: 'select product for chittam for chittam workers',
+        href: '/employee/list/chittam',
+        bgUrl: chittamBgPic
+    },
+    {
         name: 'Add Product',
         purpose: 'adding new product to product list',
         href: '/products/add',
-        bgUrl: '/'
+        bgUrl: productBgPic
     },
     {
         name: 'Client Page',
         purpose: 'Handle client related stuff',
         href: '/clients',
-        bgUrl: '/'
+        bgUrl: clientBgPic
     },
 ];
 const HomePageButton = () => {
