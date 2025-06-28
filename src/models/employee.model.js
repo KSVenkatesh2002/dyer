@@ -7,8 +7,6 @@ const employeeSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        unique: true,
-        required: true,
     },
     joinDate: {
         type: Date,
@@ -16,7 +14,6 @@ const employeeSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        // required: true,
     },
     job: {
         type: String,

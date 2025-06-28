@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useParams } from 'next/navigation';
 import { addPayment } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function Payment() {
     const params = useParams()
     const { job, employeeId } = params
+    const router = useRouter()
     const [formData, setFormData] = useState({
         amountPaid: '',
         method: 'cash',
+        paidFor: 'salary',
         paidAt: '',
         note: '',
     });
@@ -55,11 +58,13 @@ export default function Payment() {
                 ...prev,
                 amountPaid: '',
                 method: 'cash',
+                paidFor: 'salary',
                 note: '',
             }));
+            router.back()
         } catch (error) {
             console.error(error);
-            toast.error('Failed to record payment');
+            toast.error( error?.response?.data?.error || 'Failed to record payment');
         } finally {
             setLoading(false)
         }
@@ -105,9 +110,22 @@ export default function Payment() {
                         <option value="cash">Cash</option>
                         <option value="upi">UPI</option>
                         <option value="bank_transfer">Bank Transfer</option>
-                        <option value="cheque">Cheque</option>
-                        <option value="wallet">Wallet</option>
                         <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-1">paid for</label>
+                    <select
+                        name="paidFor"
+                        value={formData.paidFor}
+                        onChange={(e) => setFormData({ ...formData, paidFor: e.target.value })}
+                        required
+                        className="w-full p-3 rounded-lg border border-border  text--gray-200 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                        <option value="salary">salary</option>
+                        <option value="bonus">bonus</option>
+                        <option value="advance">advance</option>
                     </select>
                 </div>
 

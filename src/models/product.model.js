@@ -6,43 +6,50 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    sariSection: {
-        type: String,
-        enum: ['body', 'pallu'],
-        required: true
-    },
     clientId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Client',
         required: true
     },
+    sariSection: {
+        type: String,
+        enum: ['body', 'pallu'],
+        required: true
+    },
+
+    // measurements
     nailsCount: {
         type: Number,
-        required: true
     },
     conesUsed: {
         type: Number,
-        required: true
     },
     kolukkulu: {
         type: Number,
-        required: true
     },
     varasalu: {
         type: Number,
-        required: true
     },
     repeat: {
         type: Number,
-        required: true
     },
-    numberOfSarees: {
+    sareesCount: {
         type: Number,
-        required: true
     },
+
+    // design info
     designName: {
         type: String
     },
+    repeatType: {
+        type: String,
+        enum: ['Airplane', 'Raan Boone'],
+    },
+    borderInches: {
+        type: Number,
+    },
+
+    // work assignment status
     windingAssigned: {
         type: Boolean,
         default: false
@@ -55,6 +62,7 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    
     createdBy: {
         type: String,
         required: true

@@ -30,7 +30,7 @@ export default function ClientDetailsPage() {
             console.log(res)
             const { products: newProducts, hasMore: more } = res.data;
 
-            setProducts(prev => reset ? newProducts : [...prev, ...newProducts]); // ✅ handle reset
+            setProducts(prev => reset ? newProducts : [...prev, ...newProducts]);
 
             setHasMore(more);
             setPage(pageNum + 1);

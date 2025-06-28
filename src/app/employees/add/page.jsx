@@ -87,7 +87,7 @@ export default function AddEmployeePage() {
                         </button>
 
                         <Link
-                            href="/employee/attendance/tying-dyeing-workers"
+                            href="/employees/attendance/tying-dyeing-workers"
                             replace
                             className="border border-mutedText text-mutedText hover:bg-mutedHover px-4 py-2 rounded-md flex items-center justify-center gap-2"
                         >

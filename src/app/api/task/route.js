@@ -2,55 +2,53 @@
 import dbConnect from '@/lib/dbConnect';
 import Task from '@/models/task.model';
 import Product from '@/models/product.model';
-import EmployeeSummary from '@/models/employeeSummary.model';
 import { auth } from '@clerk/nextjs/server';
+import { updateEmployeeSummary } from '@/lib/helpers/task.utils';
+import { NextResponse } from 'next/server';
+import Client from '@/models/client.model'
+import EmployeeSummary from '@/models/employeeSummary.model';
 
-const assignList = ['markingAssigned', 'windingAssigned', 'chittamAssigned']
+import { getProductAssignName } from '@/lib/helpers/product.utils';
 
 export async function POST(req) {
     try {
         await dbConnect();
         const { userId } = await auth();
-        if (!userId) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-        const { productId, employeeId, pays, assign } = await req.json();
+        const { productId, employeeId, pays, job } = await req.json();
 
         if (!productId || !employeeId || pays <= 0) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
-        }
-        if (!assignList.includes(assign)) {
-            return new Response(JSON.stringify({ error: 'assign field not match' }), { status: 400 });
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Mark product as assigned
-        await Product.findOneAndUpdate({ _id: productId, createdBy: userId }, { [assign]: true });
-
-        // 2. Fetch or Create EmployeeSummary
-        let summary = await EmployeeSummary.findOne({
-            employeeId,
-            createdBy: userId
-        });
-
-        if (!summary) {
-            summary = await EmployeeSummary.create({
-                employeeId,
-                createdBy: userId,
-                totalPaidAmount: 0,
-                totalUnpaidAmount: 0,
-                advancePay: 0
-            });
+        let assigned;
+        switch (job) {
+            case 'asu-winding':
+                assigned = 'windingAssigned';
+                break;
+            case 'asu-marking':
+                assigned = 'markingAssigned';
+                break;
+            case 'chittam':
+                assigned = 'chittamAssigned';
+                break;
+            default:
+                return NextResponse.json({ error: 'Invalid or missing job parameter' }, { status: 400 });
         }
 
-        // Calculate unpaid amount after using advance
-        let remainingAmount = pays;
-        let usedAdvance = 0;
+        // Set assigned flag
+        await Product.findOneAndUpdate(
+            { _id: productId, createdBy: userId },
+            { [assigned]: true }
+        );
 
-        if (summary.advancePay > 0) {
-            usedAdvance = Math.min(summary.advancePay, pays);
-            remainingAmount = pays - usedAdvance;
-        }
+        // Update Employee Summary
+        await updateEmployeeSummary({ employeeId, pays, createdBy: userId });
 
-        // Create the task
+        // Create Task
         await Task.create({
             employeeId,
             productId,
@@ -58,20 +56,68 @@ export async function POST(req) {
             createdBy: userId,
         });
 
-        // Update Summary
-        await EmployeeSummary.findOneAndUpdate(
-            { employeeId, createdBy: userId },
-            {
-                $inc: {
-                    totalUnpaidAmount: remainingAmount,
-                    advancePay: -usedAdvance
-                }
-            }
-        );
-
         return new Response(null, { status: 204 });
     } catch (error) {
         console.error('[MARKING_TASK_ERROR]', error);
-        return new Response(JSON.stringify({ error: error.message || 'Server error' }), { status: 500 });
+        return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+    }
+}
+
+// remove task for employee
+export async function DELETE(req) {
+    try {
+        await dbConnect();
+        const { userId } = await auth();
+
+        if (!userId) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        }
+
+        const { searchParams } = new URL(req.url);
+
+        const taskId = searchParams.get('taskId');
+        const job = searchParams.get('job');
+
+        if (!taskId || !job) {
+            return new Response(JSON.stringify({ error: 'Missing taskId or job' }), { status: 400 });
+        }
+
+        // 1. Find and delete the task
+        const task = await Task.findOneAndDelete({ _id: taskId, createdBy: userId });
+
+        if (!task) {
+            return new Response(JSON.stringify({ error: 'Task not found or already deleted' }), { status: 404 });
+        }
+
+        const { productId, employeeId, pays } = task;
+
+        // 2. Remove assigned flag from product
+        const product = await Product.findOne({ _id: productId, createdBy: userId });
+
+        if (product) {
+            const field = await getProductAssignName(job);
+            product[field] = false;
+            await product.save();
+        }
+
+        // 3. Adjust EmployeeSummary
+        const summary = await EmployeeSummary.findOne({ employeeId, createdBy: userId });
+
+        if (summary) {
+            await EmployeeSummary.findOneAndUpdate(
+                { employeeId, createdBy: userId },
+                {
+                    $inc: {
+                        totalUnpaidAmount: -pays,
+                    },
+                }
+            );
+        }
+
+        return NextResponse.json({ success: true }, { status: 200 });
+
+    } catch (error) {
+        console.error('[DELETE_TASK_ERROR]', error);
+        return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
     }
 }

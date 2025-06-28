@@ -6,11 +6,7 @@ const clientNav = [
     {
         name: 'add client',
         href: '/clients/add',
-    },
-    {
-        name: 'list all client',
-        href: '/clients/list',
-    },
+    }
 ];
 export default function ClientNavButton() {
     return (
@@ -20,7 +16,7 @@ export default function ClientNavButton() {
                 <Link
                     key={navBut.name}
                     href={navBut.href}
-                    className=" group p-8 w-full rounded-2xl bg-background shadow-lg border   block"
+                    className=" group p-4 w-full rounded-2xl bg-background block"
                 >
                     <h2 className=" text-center h-10 text-lg capitalize font-semibold">
                         {navBut.name}

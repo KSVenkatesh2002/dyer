@@ -6,12 +6,6 @@ const paymentRecordSchema = new mongoose.Schema({
         ref: 'Employee',
         required: true,
     },
-
-    // jobType: {
-    //     type: String, 
-    //     enum: ['daily', 'winding', 'marking'], 
-    //     requied: true 
-    // },
     amountPaid: {
         type: Number,
         required: true
@@ -20,6 +14,7 @@ const paymentRecordSchema = new mongoose.Schema({
         type: Number,  // How much due BEFORE this payment
         required: true
     },
+
     paidDates: [{
         type: String // Example: "2025-03-02"
     }],
@@ -31,9 +26,14 @@ const paymentRecordSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
+    paidFor: {
+        type: String,
+        enum: ['bonus', 'salary', 'advance',],
+        required: true
+    },
     method: {
         type: String,
-        enum: ['cash', 'upi', 'bank_transfer', 'cheque', 'wallet', 'other'],
+        enum: ['cash', 'upi', 'bank_transfer', 'other'],
         required: true
     },
     createdBy: {

@@ -79,7 +79,7 @@ export default function EmployeesListTaskBased() {
                 productId: selectedProduct._id,
                 employeeId: selectedEmployeeId,
                 pays: Number(pays),
-                assign: 'markingAssigned'
+                job
             });
 
             toast.success('Task assigned successfully!');
@@ -97,9 +97,9 @@ export default function EmployeesListTaskBased() {
                 setProducts(prev => prev.filter(p => p._id !== selectedProduct._id));
             }
 
-        } catch (err) {
-            toast.error('Failed to assign task');
-            console.error(err);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to assign task');
+            console.error(error);
         }
     };
 

@@ -27,18 +27,18 @@ export async function POST(req) {
         if (nameExists) return NextResponse.json({ error: 'Name already exists' }, { status: 401 });
 
         // validate phone
-        if (!phone || phone.length < 10) {
-            return NextResponse.json({ error: 'Please provide a valid phone number' }, { status: 401 });
-        }
-        const phoneExist = await Client.findOne({ phone, createdBy: userId });
-        if (phoneExist) return NextResponse.json({ error: 'Phone already exists' }, { status: 401 });
+        // if (!phone || phone.length < 10) {
+        //     return NextResponse.json({ error: 'Please provide a valid phone number' }, { status: 401 });
+        // }
+        // const phoneExist = await Client.findOne({ phone, createdBy: userId });
+        // if (phoneExist) return NextResponse.json({ error: 'Phone already exists' }, { status: 401 });
 
 
         const newClient = new Client({
-            name: name?.trim(),
-            phone: phone?.trim(),
-            address: address?.trim(),
-            notes: notes?.trim(),
+            name: name,
+            phone: phone,
+            address: address,
+            notes: notes,
             createdBy: userId,
         });
 

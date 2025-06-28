@@ -18,24 +18,24 @@ export async function POST(req, { params }) {
     try {
         const { job } = await params;
         const { userId } = await auth();
-        const { employeeId, amountPaid, method, note, paidAt } = await req.json();
+        const { employeeId, amountPaid, method, paidFor, note, paidAt } = await req.json();
 
         const validatePaymentInputResponse = await validatePaymentInput({ employeeId, amountPaid, job, method, userId });
-        console.log(validatePaymentInputResponse);
-        
         if (validatePaymentInputResponse) return validatePaymentInputResponse
 
         const summary = await EmployeeSummary.findOne({ employeeId, createdBy: userId });
-        const beforeAmountPaid = summary.totalUnpaidAmount || 0;
+        const beforeAmountPaid = summary.totalUnpaidAmount || 0; 
 
         let paidDates = []; // amount which is remain after salary settled
 
-        if (job === 'tying' || job === 'dyeing') {
+        if (paidFor === 'bonus') {
+            summary.totalPaidAmount += amountPaid
+            await summary.save()
+        } else if (job === 'tying' || job === 'dyeing') {
             ({ paidDates } = await handleTimeBasedPayment({
                 employeeId, amountPaid, summary, createdBy: userId
             }));
-        } 
-        else if (job === 'asu-marking' || job === 'asu-winding') {
+        } else if (job === 'asu-marking' || job === 'asu-winding') {
             await handleTaskBasedPayment(
                 {employeeId, amountPaid, summary, createdBy: userId }
             );
@@ -46,6 +46,7 @@ export async function POST(req, { params }) {
             employeeId,
             amountPaid,
             method,
+            paidFor,
             note,
             beforeAmountPaid,
             createdBy: userId,
@@ -57,7 +58,7 @@ export async function POST(req, { params }) {
 
     } catch (error) {
         console.log(error);
-        return NextResponse.json({ message: error.message }, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 

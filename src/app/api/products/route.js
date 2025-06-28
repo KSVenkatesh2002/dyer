@@ -31,7 +31,6 @@ export async function GET(req) {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('productId createdAt nailsCount kolukkulu varasalu repeat numberOfSarees windingAssigned markingAssigned chittamAssigned sariSection conesUsed');
 
         const totalCount = await Product.countDocuments({
             clientId,
@@ -60,18 +59,11 @@ export async function POST(req) {
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
+        const body = await req.json();
         const {
             sariSection,
             clientId,
-            nailsCount,
-            conesUsed,
-            kolukkulu,
-            varasalu,
-            repeat,
-            numberOfSarees,
-            designName
-        } = await req.json();
+        } = body;
 
         if (!clientId || !sariSection) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -81,22 +73,14 @@ export async function POST(req) {
 
         const newProduct = await Product.create({
             productId,
-            sariSection,
-            clientId,
-            nailsCount,
-            conesUsed,
-            kolukkulu,
-            varasalu,
-            repeat,
-            numberOfSarees,
-            designName,
+            ...body,
             windingAssigned: false,
             markingAssigned: false,
             chittamAssigned: false,
             createdBy: userId
         });
 
-        return NextResponse.json({ success: true, productId: newProduct.productId }, { status: 201 });
+        return NextResponse.json(newProduct.productId, { status: 201 });
 
     } catch (error) {
         console.error('[CREATE_PRODUCT_ERROR]', error);

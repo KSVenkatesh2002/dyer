@@ -1,77 +1,80 @@
 import dbConnect from '@/lib/dbConnect';
-// import mongoose from 'mongoose';
 import Product from '@/models/product.model';
 import Task from '@/models/task.model';
-// import Employee from '@/models/employee.model';
 import Client from '@/models/client.model';
-import EmployeeSummary from '@/models/employeeSummary.model';
 import { generateSafeProductId } from '@/lib/products/utils';
 import { auth } from '@clerk/nextjs/server';
 import Employee from '@/models/employee.model';
+import { updateEmployeeSummary } from '@/lib/helpers/task.utils';
+import { NextResponse } from 'next/server';
 
 export async function POST(req) {
     await dbConnect();
-    const { userId } = await auth();
 
+    const { userId } = await auth();
     if (!userId) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const body = await req.json();
     const {
-        sariSection,
         clientId,
+        sariSection,
         nailsCount,
         conesUsed,
         kolukkulu,
         varasalu,
         repeat,
-        numberOfSarees,
+        sareesCount,
         designName,
+        repeatType,
+        borderInches,
         employeeId,
         pays,
-    } = await req.json();
+    } = body;
 
     if (!clientId || !employeeId || !sariSection || pays <= 0) {
-        return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     try {
         const field = {
-            sariSection,
             clientId,
+            sariSection,
             nailsCount,
             conesUsed,
             kolukkulu,
             varasalu,
             repeat,
-            numberOfSarees,
+            sareesCount,
             designName,
-            createdBy: userId
-        }
-        const employeeJob = await Employee.findOne({ _id: employeeId, createdBy: userId })
+            repeatType,
+            borderInches,
+            createdBy: userId,
+        };
+
+        const employeeJob = await Employee.findOne({ _id: employeeId, createdBy: userId });
         if (!employeeJob) {
-            return new Response(JSON.stringify({ error: 'employee not found' }), { status: 400 });
+            return NextResponse.json({ error: 'Employee not found' }, { status: 400 });
         }
+
         switch (employeeJob.job) {
             case 'asu-winding':
-                field.windingAssigned = true
+                field.windingAssigned = true;
                 break;
             case 'asu-marking':
-                field.markingAssigned = true
+                field.markingAssigned = true;
                 break;
             case 'chittam':
-                field.chittamAssigned = true
+                field.chittamAssigned = true;
                 break;
             default:
-                return new Response(JSON.stringify({ error: 'Invalid or missing job parameter' }), { status: 400 });
+                return NextResponse.json({ error: 'Invalid or missing job parameter' }, { status: 400 });
         }
 
         const productId = await generateSafeProductId(clientId, sariSection, userId);
-        field.productId = productId
+        field.productId = productId;
 
-        const taskAmount = pays * numberOfSarees * repeat;
-
-        // 1. Create the Product
         const product = await Product.create([field]);
 
         await Client.findOneAndUpdate(
@@ -79,54 +82,24 @@ export async function POST(req) {
             { lastOrderedAt: new Date() }
         );
 
-        // 2. Fetch or Create EmployeeSummary
-        let summary = await EmployeeSummary.findOne({
+        await updateEmployeeSummary({
             employeeId,
-            createdBy: userId
+            pays,
+            createdBy: userId,
         });
 
-        if (!summary) {
-            summary = await EmployeeSummary.create({
-                employeeId,
-                createdBy: userId,
-                totalPaidAmount: 0,
-                totalUnpaidAmount: 0,
-                advancePay: 0
-            });
-        }
-
-        // 3. Calculate unpaid amount after using advance
-        let remainingAmount = taskAmount;
-        let usedAdvance = 0;
-
-        if (summary.advancePay > 0) {
-            usedAdvance = Math.min(summary.advancePay, taskAmount);
-            remainingAmount = taskAmount - usedAdvance;
-        }
-
-        // 4. Create Task
-        await Task.create([{
-            productId: product[0]._id,
-            employeeId,
-            pays: taskAmount,
-            createdBy: userId
-        }]);
-
-        // 5. Update Summary
-        await EmployeeSummary.findOneAndUpdate(
-            { employeeId, createdBy: userId },
+        await Task.create([
             {
-                $inc: {
-                    totalUnpaidAmount: remainingAmount,
-                    advancePay: -usedAdvance
-                }
-            }
-        );
+                productId: product[0]._id,
+                employeeId,
+                pays,
+                createdBy: userId,
+            },
+        ]);
 
-        return new Response(JSON.stringify({ success: true, productId }), { status: 201 });
-
+        return NextResponse.json({ success: true, productId }, { status: 201 });
     } catch (error) {
         console.error('[WITH_TASK_ERROR]', error);
-        return new Response(JSON.stringify({ error: error.message || 'Server error' }), { status: 500 });
+        return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
     }
 }

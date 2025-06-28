@@ -61,7 +61,7 @@ export default function ClientListPage() {
     //     console.log('[clients] :', clients);
     // }, [clients]);
 
-    if (loading) return (<p className='text bg-center w-full'>loading...</p>)
+    if (loading) return (<p className='flex-1 flex justify-center items-center w-full text-center'>loading...</p>)
 
     if (!loading && (!clients || clients.length === 0)) {
         return <NoData text={'No clients available.'} />

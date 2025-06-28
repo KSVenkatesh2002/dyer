@@ -7,15 +7,14 @@ const clientSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
-        required: true,
     },
     address: {
         type: String,
-        required: false
+        trim: true
     },
     notes: {
         type: String,
-        required: false
+        trim: true
     },
     isActive: {
         type: Boolean,

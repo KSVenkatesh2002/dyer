@@ -2,7 +2,7 @@ export async function handleTaskBasedPayment({ employeeId, amountPaid, summary, 
     if(amountPaid <= summary.totalUnpaidAmount){
         summary.totalUnpaidAmount -= amountPaid
     } else if(amountPaid > summary.totalUnpaidAmount){
-        summary.advancePay = amountPaid - summary.totalUnpaidAmount
+        summary.advancePay += amountPaid - summary.totalUnpaidAmount
         summary.totalUnpaidAmount = 0
     }
     

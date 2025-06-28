@@ -5,18 +5,18 @@ import { createProductWithTask } from '@/lib/api';
 import { toast } from 'react-toastify';
 
 export default function AddProductWithTaskPage() {
-  const { employeeId } = useParams();
+    const { employeeId } = useParams();
 
-  const handleSubmit = async (form) => {
-    await createProductWithTask({ ...form, employeeId });
-    toast.success('Product created and task assigned!');
-  };
+    const handleSubmit = async (form) => {
+        await createProductWithTask({ ...form, employeeId });
+        toast.success('Product created and task assigned!');
+    };
 
-  return (
-    <ProductForm
-  onSubmit={handleSubmit}
-  showPopup={true}
-  employeeId={employeeId}
-/>
-  );
+    return (
+        <ProductForm
+            onSubmit={handleSubmit}
+            showPopup={true}
+            employeeId={employeeId}
+        />
+    );
 }

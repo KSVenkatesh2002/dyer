@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { getEmployeeDetailsById, getTasks, paymentSummary } from '@/lib/api';
+import { getEmployeeDetailsById, getTasks, paymentSummary, removeTask } from '@/lib/api';
 import Link from 'next/link';
 import NoData from '@/components/NoData';
 import { ProductList } from '@/components/productList';
+import { toast } from 'react-toastify';
 
 export default function WindingEmployeeDashboard() {
     const { employeeId } = useParams();
@@ -33,6 +34,18 @@ export default function WindingEmployeeDashboard() {
             }
         })();
     }, [employeeId]);
+
+    const handleRemoveTask = async (taskId) => {
+        try {
+            await removeTask({ taskId, job: employee.job })
+            
+            setTasks(prev => prev.filter(task => task._id !== taskId));
+            toast.success("Task removed");
+        } catch (error) {
+            toast.error( error?.response?.data?.error || "Failed to remove task");
+            console.error(error);
+        }
+    };
 
     if (loading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8" /> loading...</div>;
 
@@ -72,51 +85,13 @@ export default function WindingEmployeeDashboard() {
             </div>
 
             {/* Products List */}
-            {/* <section className="bg-surface rounded-lg p-4 shadow">
-                <h2 className="text-lg font-semibold mb-4">Assigned Products</h2>
-                {tasks.length === 0 ? (
-                    <p className="text-mutedText">No products assigned yet.</p>
-                ) : (
-                    <ul className="space-y-4"> 
-                        {tasks.map(task => {
-                            const product = task.productId;
-                            const isSelected = selectedProductId === product._id;
-                            return (
-                                <li key={task._id}>
-                                    <button
-                                        onClick={() => setSelectedProductId(isSelected ? null : product._id)}
-                                        className="w-full bg-accent/30 px-4 py-3 rounded-md flex justify-between items-center font-semibold transition"
-                                    >
-                                        {product.productId}
-                                        <span className="italic text-sm text-right font-medium">₹{task.pays}</span>
-                                    </button>
-
-                                    {isSelected && (
-                                        <div className="mt-2 border border-muted rounded p-4 bg-background/30  text-sm grid grid-cols-2 gap-4">
-                                            <p className="flex items-center gap-2 uppercase"><IoIosPerson /> <strong className='capitalize'>Client:</strong> {product.clientId?.name || "N/A"}</p>
-                                            <p className="flex items-center gap-2"><PiMapPinSimpleAreaFill /> <strong>Sari Section:</strong> {product.sariSection}</p>
-                                            <p className="flex items-center gap-2"><GiNails /> <strong>Nails Count:</strong> {product.nailsCount}</p>
-                                            <p className="flex items-center gap-2"><BiSolidTrafficCone /> <strong>Cones Used:</strong> {product.conesUsed}</p>
-                                            <p className="flex items-center gap-2"><PiNumberEightLight className='rotate-90' /> <strong>Kolukkulu:</strong> {product.kolukkulu}</p>
-                                            <p className="flex items-center gap-2"><MdOutlineRepeat /> <strong>Varasalu:</strong> {product.varasalu}</p>
-                                            <p className="flex items-center gap-2"><BsArrowCounterclockwise /> <strong>Repeat:</strong> {product.repeat}</p>
-                                            <p className="flex items-center gap-2"><LuTally5 /> <strong>Sarees:</strong> {product.numberOfSarees}</p>
-                                            <p className="flex items-center gap-2"><MdDriveFileRenameOutline /> <strong>Design Name:</strong> {product.designName || "N/A"}</p>
-                                            <p className="flex items-center gap-2"><GiTakeMyMoney /> <strong>Pay:</strong> ₹{task.pays}</p>
-                                        </div>
-                                    )}
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-            </section> */}
             <ProductList
                 title="Assigned Products"
                 items={tasks}
                 isTaskList={true}
                 selectedProductId={selectedProductId}
                 setSelectedProductId={setSelectedProductId}
+                onRemoveTask={handleRemoveTask}
             />
 
         </div>

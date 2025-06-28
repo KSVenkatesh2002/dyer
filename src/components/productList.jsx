@@ -1,4 +1,5 @@
 // components/ProductList.jsx
+import { FaTrash } from "react-icons/fa";
 
 import {
     BiSolidTrafficCone,
@@ -24,11 +25,30 @@ export const ProductList = ({
     isTaskList = false,
     selectedProductId,
     setSelectedProductId,
+    onRemoveTask = () => { },
 }) => {
     const isEmpty = items.length === 0;
 
-    const renderProductDetails = (product, pay) => (
+    const renderProductDetails = (product, pay, taskId) => (
         <div className="mt-2 border border-muted rounded p-4 bg-background/10 text-sm grid grid-cols-2 gap-4">
+
+            <p
+                className="text-red-500 rounded-md col-span-full text-lg font-semibold bg-secondary p-2 relative"
+            >
+                Product Details
+                {/* 🗑 Remove icon for task items */}
+                {isTaskList && (
+                    <button
+                        onClick={() => onRemoveTask(taskId)}
+                        className="absolute top-3 right-3 text-red-600 hover:text-red-800 text-lg"
+                        title="Remove Task"
+                    >
+                        <FaTrash />
+                    </button>
+                )}
+            </p>
+
+
             {product.clientId && (
                 <p className="flex items-center gap-2 uppercase">
                     <IoIosPerson /> <strong className="capitalize">Client:</strong> {product.clientId.name}
@@ -80,7 +100,7 @@ export const ProductList = ({
                                         <span className="italic text-sm text-right font-medium">₹{item.pays}</span>
                                     )}
                                 </button>
-                                {isSelected && renderProductDetails(product, isTaskList ? item.pays : undefined)}
+                                {isSelected && renderProductDetails(product, isTaskList ? item.pays : undefined, item._id)}
                             </li>
                         );
                     })}

@@ -102,7 +102,7 @@ export default function EmployeeListPage() {
                             {/* employee name */}
                             <a
                                 href={`/dashboard/time-based/${emp._id}`}
-                                // onClick={()=>handleClick(`/employee/${emp._id}`)}
+                                // onClick={()=>handleClick(`/employees/${emp._id}`)}
                                 className='flex flex-row items-center gap-2 grow'
                             >
                                 <div className='text-lg font-semibold  capitalize'>
@@ -186,7 +186,7 @@ export default function EmployeeListPage() {
             </ul>
 
             {/* add employee button */}
-            <Link href="/employee/add" className='block w-full'>
+            <Link href="/employees/add" className='block w-full'>
                 <div className={` p-6 bg-accent/80 text-center text-lg rounded-2xl shadow-xl shadow-gray-400`}>
                     Add Employee +
                 </div>
