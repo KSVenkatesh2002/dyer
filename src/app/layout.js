@@ -17,10 +17,10 @@ export default async function RootLayout({ children }) {
     return (
         <ClerkProvider>
             <html lang="en">
-                <body className=" bg-surface/40 text-text max-w-lvh mx-auto">
+                <body className=" bg-surface/40 text-text  mx-auto">
                     <Header />
 
-                    <main className=" min-h-[calc(100vh-64px)] ">
+                    <main className=" min-h-[calc(100vh-64px)] max-w-7xl mx-auto">
                         {children}
                     </main>
                     <ToastContainer position="top-right" autoClose={2000} />

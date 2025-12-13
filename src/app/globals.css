@@ -28,38 +28,8 @@
     --color-info: #DB8DD0;
     --color-link: #B33791;
 }
-/* globals.css 332D56*/
-/* @theme {
-    --color-primary: #B33791;
-    --color-secondary: #C562AF;
-    --color-background: #DB8DD0;
-    --color-surface: #FEC5F6;
 
-    --color-accent: #5E3A73;
 
-    --color-absent: #d74a49;
-    --color-present: rgb(34, 197, 94);
-    --color-half: #ffa600;
-    --color-holiday: #1976D2;
-
-    --color-disabled: #D49AC4;
-    --color-text: #2A103B;
-    --color-muted-text: #A67899;
-    --color-border: #E6B5DC;
-
-    --color-error: #ffadad;
-    --color-success: #caffbf;
-    --color-warning: #ffd6a5;
-    --color-info: #DB8DD0;
-    --color-link: #B33791;
-} */
-
-/* @theme .dark {
-    --color-background: #2e2e2e;
-    --color-surface: #444444;
-    --color-text: #fdfdfd;
-    --color-border: #5e5e5e;
-} */
 
 @layer utilities {
 

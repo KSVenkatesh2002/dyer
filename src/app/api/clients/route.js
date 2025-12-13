@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
 
 import Client from '@/models/client.model';
 
-// add client
 export async function POST(req) {
     try {
         await dbConnect();
@@ -25,14 +24,6 @@ export async function POST(req) {
             createdBy: userId,
         });
         if (nameExists) return NextResponse.json({ error: 'Name already exists' }, { status: 401 });
-
-        // validate phone
-        // if (!phone || phone.length < 10) {
-        //     return NextResponse.json({ error: 'Please provide a valid phone number' }, { status: 401 });
-        // }
-        // const phoneExist = await Client.findOne({ phone, createdBy: userId });
-        // if (phoneExist) return NextResponse.json({ error: 'Phone already exists' }, { status: 401 });
-
 
         const newClient = new Client({
             name: name,
@@ -72,13 +63,12 @@ export async function GET() {
             },
             {
                 $sort: {
-                    isActive: -1, // true (1) first
-                    name: 1       // alphabetical order
+                    isActive: -1, 
+                    name: 1
                 },
             },
         ]);
 
-        // const clientList = await Client.find({ createdBy: userId }).sort({ isActive: -1, name: 1, });
 
         return NextResponse.json( clientList , { status: 200 });
     } catch (error) {
