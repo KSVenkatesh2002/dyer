@@ -48,7 +48,7 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-6">Support</h4>
+            <h4 className="text-lg font-semibold text-white mb-6">Support (coming)</h4>
             <ul className="space-y-3 text-sm">
               <FooterLink href="/help">Help Center</FooterLink>
               <FooterLink href="/documentation">Documentation</FooterLink>
@@ -73,11 +73,16 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-surface/80">
                 <FaPhone className="text-primary" />
-                <span>+91 98765 43210</span>
+                <span>+91 86808 24866</span>
               </li>
               <li className="flex items-center gap-3 text-surface/80">
                 <FaEnvelope className="text-primary" />
-                <span>support@dyerhandloom.com</span>
+                <span>kotavenkatesh2002@gmail.com</span>
+              </li>
+              <li className="flex items-center gap-3 text-surface/80">
+                <Link href="venkatesh-k-s.vercel.app">
+                  <span>Check My Portfolio</span>
+                </Link>
               </li>
             </ul>
           </div>

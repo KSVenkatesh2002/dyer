@@ -109,110 +109,6 @@ export default function ProductForm({
     }
   };
 
-  const InputGroup = ({
-    label,
-    name,
-    type = "number",
-    icon: Icon,
-    value,
-    onChange,
-    options = null,
-  }) => (
-    <div className="space-y-2">
-      <label className="text-sm font-bold text-gray-700 capitalize flex items-center gap-2">
-        {Icon && (
-          <Icon
-            className={`text-lg text-primary ${
-              label === "Kolukkulu" ? "rotate-90" : ""
-            }`}
-          />
-        )}
-        {label}
-      </label>
-      <div className="relative">
-        {options ? (
-          <select
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all cursor-pointer appearance-none text-gray-700 font-medium"
-          >
-            {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={type}
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium text-gray-700 placeholder:text-gray-400"
-          />
-        )}
-      </div>
-    </div>
-  );
-
-  const SectionHeader = ({ title }) => (
-    <div className="col-span-full mb-4 mt-2 pb-2 border-b border-gray-100">
-      <h3 className="text-lg font-bold text-secondary">{title}</h3>
-    </div>
-  );
-
-  const Popup = ({ onClose, employeeId }) => (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-fade-in p-4">
-      <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md space-y-6 text-center transform transition-all scale-100">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
-          <MdCheckCircle className="text-3xl" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-black text-gray-900 mb-2">
-            Task Assigned!
-          </h2>
-          <p className="text-gray-500">
-            Product ID:{" "}
-            <span className="font-mono font-bold text-gray-800">
-              {String(productId).substring(0, 8)}...
-            </span>
-          </p>
-        </div>
-
-        <p className="text-gray-600">
-          Would you like to assign another task to this employee?
-        </p>
-
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={onClose}
-            className="w-full py-3 bg-secondary text-white font-bold rounded-xl shadow-lg shadow-secondary/20 hover:bg-secondary/90 transition-all"
-          >
-            Yes, Add Another
-          </button>
-
-          {employeeId && (
-            <Link
-              href={`/dashboard/task-based/${employeeId}`}
-              replace
-              className="w-full py-3 border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-all"
-            >
-              Go to Dashboard
-            </Link>
-          )}
-
-          <button
-            onClick={() => router.back()}
-            className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2"
-          >
-            Wait, Go Back
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-secondary/5 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -403,3 +299,107 @@ export default function ProductForm({
     </div>
   );
 }
+
+const SectionHeader = ({ title }) => (
+  <div className="col-span-full mb-4 mt-2 pb-2 border-b border-gray-100">
+    <h3 className="text-lg font-bold text-secondary">{title}</h3>
+  </div>
+);
+
+const Popup = ({ onClose, employeeId }) => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-fade-in p-4">
+    <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md space-y-6 text-center transform transition-all scale-100">
+      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600">
+        <MdCheckCircle className="text-3xl" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-black text-gray-900 mb-2">
+          Task Assigned!
+        </h2>
+        <p className="text-gray-500">
+          Product ID:{" "}
+          <span className="font-mono font-bold text-gray-800">
+            {String(productId).substring(0, 8)}...
+          </span>
+        </p>
+      </div>
+
+      <p className="text-gray-600">
+        Would you like to assign another task to this employee?
+      </p>
+
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={onClose}
+          className="w-full py-3 bg-secondary text-white font-bold rounded-xl shadow-lg shadow-secondary/20 hover:bg-secondary/90 transition-all"
+        >
+          Yes, Add Another
+        </button>
+
+        {employeeId && (
+          <Link
+            href={`/dashboard/task-based/${employeeId}`}
+            replace
+            className="w-full py-3 border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-all"
+          >
+            Go to Dashboard
+          </Link>
+        )}
+
+        <button
+          onClick={() => router.back()}
+          className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2"
+        >
+          Wait, Go Back
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+const InputGroup = ({
+  label,
+  name,
+  type = "number",
+  icon: Icon,
+  value,
+  onChange,
+  options = null,
+}) => (
+  <div className="space-y-2">
+    <label className="text-sm font-bold text-gray-700 capitalize flex items-center gap-2">
+      {Icon && (
+        <Icon
+          className={`text-lg text-primary ${
+            label === "Kolukkulu" ? "rotate-90" : ""
+          }`}
+        />
+      )}
+      {label}
+    </label>
+    <div className="relative">
+      {options ? (
+        <select
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all cursor-pointer appearance-none text-gray-700 font-medium"
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium text-gray-700 placeholder:text-gray-400"
+        />
+      )}
+    </div>
+  </div>
+);
