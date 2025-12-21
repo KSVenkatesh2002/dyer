@@ -72,7 +72,7 @@ export default function OnboardingComponent() {
         <div className="text-center mb-8 space-y-2">
           <h1 className="text-3xl font-black text-secondary">Dyer Handloom</h1>
           <p className="text-muted-text">
-            Let's set up your digital workspace.
+            Let&apos;s set up your digital workspace.
           </p>
         </div>
 
