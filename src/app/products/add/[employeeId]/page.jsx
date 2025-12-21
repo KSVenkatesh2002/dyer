@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import ProductForm from "../../../../../components/forms/ProductForm";
+import ProductForm from "@/components/forms/ProductForm";
 import { createProductWithTask } from "@/lib/api";
 import { toast } from "react-toastify";
 

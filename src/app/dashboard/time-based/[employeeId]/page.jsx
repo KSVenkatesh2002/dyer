@@ -9,10 +9,10 @@ import {
   getSummaryTimeBased,
   getEmployeeDetailsById,
 } from "@/lib/api";
-import AttendanceCalendar from "../../../../../components/dashboard/time-based/AttendanceCalendar";
+import AttendanceCalendar from "@/components/dashboard/time-based/AttendanceCalendar";
 import Details from "./details/Details";
 import EmployeeSkeletonPage from "./loading";
-import PaymentNavButton from "../../../../../components/dashboard/time-based/PaymentNavButton";
+import PaymentNavButton from "@/components/dashboard/time-based/PaymentNavButton";
 import { FaUserClock } from "react-icons/fa";
 
 export default function AttendanceLogPage() {
