@@ -3,237 +3,275 @@ import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaKey,
+  FaArrowRight,
+  FaInfoCircle,
+} from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const RegisterForm = () => {
-
-  const { isLoaded, signUp, setActive } = useSignUp()
-  const [code, setCode] = useState("")
-  const [verify, setVerify] = useState(false)
-  const router = useRouter()
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const [code, setCode] = useState("");
+  const [verify, setVerify] = useState(false);
+  const router = useRouter();
 
   const [form, setForm] = useState({
-    username: '',
-    emailAddress: '',
-    password: ''
+    username: "",
+    emailAddress: "",
+    password: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   function handleChange(e) {
     e.preventDefault();
-    setError('')
-    const target = e.target
-    const name = target.name
-    const value = target.value
+    setError("");
+    const target = e.target;
+    const name = target.name;
+    const value = target.value;
 
     setForm((prev) => ({
       ...prev,
-      [name]: value
-    }))
-
-    console.log(form)
-
+      [name]: value,
+    }));
   }
 
   async function handleVerificationSubmit(e) {
-    e.preventDefault()
-    if (loading) return
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError("");
 
     try {
       const signupAttempt = await signUp.attemptEmailAddressVerification({
         code,
-      })
-      if (signupAttempt.status === 'complete') {
-        await setActive({ session: signupAttempt.createdSessionId })
-        console.log('session', signupAttempt.createdSessionId)
-        router.replace('/')
+      });
+      if (signupAttempt.status === "complete") {
+        await setActive({ session: signupAttempt.createdSessionId });
+        router.replace("/");
       } else {
-        console.log("====================================");
-        console.error('Error status not complete:', JSON.stringify(signupAttempt, null, 2))
-        console.log("====================================");
+        console.error(
+          "Error status not complete:",
+          JSON.stringify(signupAttempt, null, 2)
+        );
       }
     } catch (error) {
-      setError(error.message)
-      console.error('Error while otp verification:', JSON.stringify(error, null, 2))
+      setError(error.message);
+      console.error(
+        "Error while otp verification:",
+        JSON.stringify(error, null, 2)
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log(form);
-    if (loading) return
-    setLoading(true)
-    setError('')
+    if (loading) return;
+    setLoading(true);
+    setError("");
     try {
-
       await signUp.create({
         ...form,
-      })
+      });
 
       await signUp.prepareEmailAddressVerification({
-        strategy: "email_code"
-      })
+        strategy: "email_code",
+      });
 
-      setVerify(true)
-
+      setVerify(true);
     } catch (error) {
-      setError(error.message)
-      console.log("====================================");
+      setError(error.message);
       console.error("error during register", error);
-      console.log("====================================");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
-  if (!isLoaded) return;
+  if (!isLoaded) return null;
+
+  const InputGroup = ({
+    label,
+    name,
+    type = "text",
+    placeholder,
+    icon: Icon,
+    value,
+    onChange,
+  }) => (
+    <div className="space-y-2">
+      <label className="text-sm font-bold text-gray-700 ml-1">{label}</label>
+      <div className="relative group">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">
+            <Icon />
+          </div>
+        )}
+
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className={`w-full ${
+            Icon ? "pl-11" : "pl-4"
+          } pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 font-medium text-gray-700 placeholder:text-gray-400`}
+          placeholder={placeholder}
+        />
+      </div>
+    </div>
+  );
 
   if (verify) {
     return (
-      <form
-        onSubmit={handleVerificationSubmit}
-        className="flex flex-col items-center justify-center container mx-8 w-full min-h-[calc(100vh-64px)] space-y-5 "
-      >
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      <div className="min-h-[calc(100vh-64px)] bg-secondary/5 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl shadow-gray-200/50 p-8 md:p-10 border border-white/50 text-center">
+          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600">
+            <FaKey className="text-2xl" />
+          </div>
+          <h2 className="text-2xl font-black text-secondary mb-2">
+            Verify Email
+          </h2>
+          <p className="text-muted-text mb-8">
+            Please enter the code sent to your email.
+          </p>
 
-        <div className="flex flex-col space-y-2 w-full">
-          <label
-            htmlFor="code"
-            className="text-sm font-medium text-black  leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Code
-          </label>
-          <input
-            type="text"
-            name="code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="block w-full px-3 py-3  mt-1 border rounded-lg border-gray-400 shadow-none focus:outline-none focus:ring-0 focus:ring-[#aeaeae] focus:border-gray-400 focus:bg-gray-50 sm:text-sm"
-            placeholder="enter code"
-          />
-        </div>
-        <div className="w-full">
-          <button
-            className={`flex justify-center font-semibold border items-center rounded-md py-2 px-8 w-full text-[16px]  cursor-pointer   ring-[#f55418]/20  ${loading
-              ? 'bg-accent/10 text-gray-400/50 border-accent/20'
-              : 'bg-accent hover:text-accent hover:bg-transparent text-white border-accent'
+          {error && (
+            <p className="text-sm text-red-500 mb-4 bg-red-50 p-3 rounded-lg">
+              {error}
+            </p>
+          )}
+
+          <form onSubmit={handleVerificationSubmit} className="space-y-6">
+            <InputGroup
+              label="Verification Code"
+              name="code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Ex: 123456"
+              icon={null}
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
+                loading
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                  : "bg-primary text-white hover:bg-primary/90 hover:-translate-y-1 hover:shadow-primary/30"
               }`}
-            disabled={loading}
-            type="submit"
-          >
-            verify
-          </button>
+            >
+              {loading ? (
+                <AiOutlineLoading3Quarters className="animate-spin" />
+              ) : (
+                "Verify Account"
+              )}
+            </button>
+          </form>
         </div>
-      </form>
-    )
+      </div>
+    );
   }
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="flex items-center justify-center container mx-auto w-full min-h-[calc(100vh-64px)]  "
-      >
-        <div className="max-w-md w-full mx-auto rounded-2xl p-8 py-12 md:py-12 space-y-8 ">
-          {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-          <p
-            id="tempLoginInfo"
-            className="bg-blue-50 border-l-4 border-orange-600 text-blue-900 px-4 py-3 rounded-lg text-sm leading-6 font-medium"
-          >
-            For temporary access, please visit the Login page and use the following credentials:<br />
-            <span className="font-semibold">Email:</span> dyer@handloom.com<br />
-            <span className="font-semibold">Password:</span> dyer@handloom
+    <div className="min-h-[calc(100vh-64px)] bg-secondary/5 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl shadow-gray-200/50 p-8 md:p-10 border border-white/50">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-black text-secondary mb-2">
+            Create Account
+          </h1>
+          <p className="text-muted-text">
+            Join Dyer Handloom to manage your workshop.
           </p>
+        </div>
 
+        {/* Global Error */}
+        {error && (
+          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium mb-6 flex items-start gap-2 animate-pulse">
+            <FaInfoCircle className="mt-0.5 shrink-0" />
+            <span className="break-words">{error}</span>
+          </div>
+        )}
 
-          <p className="mt-1 text-sm text-green-500"></p>
-          <div className="font-bold text-neutral-800 dark:text-neutral-200 flex flex-col space-y-2">
-            <Link href="/" className="flex items-start w-full justify-start">
-              <h3 className="text-black font-bold text-[28px]">Create Company</h3>
-            </Link>
-            <p className="font-normal text-[14px] text-neutral-800 ">
-              Enter Your Details
+        {/* Temp Credentials Info */}
+        <div className="mb-8 p-4 bg-orange-50 border border-orange-100 rounded-xl text-orange-900 text-sm leading-relaxed flex gap-3">
+          <FaInfoCircle className="text-orange-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-orange-700 mb-1">
+              Already have an account?
             </p>
-          </div>
-
-          <div className="flex flex-col space-y-6 mb-4">
-            <div className="flex flex-col space-y-2 w-full">
-              <label
-                htmlFor="username"
-                className="text-sm font-medium text-black  leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                onChange={(e) => handleChange(e)}
-                className="block w-full px-3 py-3  mt-1 border rounded-lg border-gray-400 shadow-none focus:outline-none focus:ring-0 focus:ring-[#aeaeae] focus:border-gray-400 focus:bg-gray-50 sm:text-sm"
-                placeholder="username"
-              />
-            </div>
-            <div className="flex flex-col space-y-2 w-full">
-              <label
-                htmlFor="emailAddress"
-                className="text-sm font-medium text-black  leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Email
-              </label>
-              <input
-                type="text"
-                name="emailAddress"
-                onChange={(e) => handleChange(e)}
-                className="block w-full px-3 py-3  mt-1 border rounded-lg border-gray-400 shadow-none focus:outline-none focus:ring-0 focus:ring-[#aeaeae] focus:border-gray-400 focus:bg-gray-50 sm:text-sm"
-                placeholder="abc@gmail.com"
-              />
-            </div>
-            <div className="flex flex-col space-y-2 w-full">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-black  leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                onChange={(e) => handleChange(e)}
-                className="block w-full px-3 py-3  mt-1 border rounded-lg border-gray-400 shadow-none focus:outline-none focus:ring-0 focus:ring-[#aeaeae] focus:border-gray-400 focus:bg-gray-50 sm:text-sm"
-                placeholder="password"
-              />
-            </div>
-            {/* CAPTCHA Widget */}
-            <div id="clerk-captcha"></div>
-          </div>
-          <div className="w-full">
-            <button
-              className={`flex justify-center font-semibold border items-center rounded-md py-2 px-8 w-full text-[16px]  cursor-pointer   ring-[#f55418]/20  ${loading
-                ? 'bg-accent/10 text-gray-400/50 border-accent/20'
-                : 'bg-accent hover:text-accent hover:bg-transparent text-white border-accent'
-                }`}
-              disabled={loading}
-              type="submit"
-            >
-              Create
-            </button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm font-medium text-neutral-800 ">
-              Already have an account?{" "}
-              <Link href={"/login"}>
-                <span className="text-[#1565C0] ">Login</span>
-              </Link>
+            <p>
+              Use the demo credentials on the login page if you just want to
+              look around.
             </p>
           </div>
         </div>
-      </form>
-    </>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <InputGroup
+            label="Username"
+            name="username"
+            onChange={handleChange}
+            placeholder="Choose a username"
+            icon={FaUser}
+          />
+          <InputGroup
+            label="Email Address"
+            name="emailAddress"
+            onChange={handleChange}
+            placeholder="name@example.com"
+            icon={FaEnvelope}
+          />
+          <InputGroup
+            label="Password"
+            name="password"
+            type="password"
+            onChange={handleChange}
+            placeholder="Create a strong password"
+            icon={FaLock}
+          />
+
+          {/* CAPTCHA Widget Container - Needed for Clerk */}
+          <div id="clerk-captcha" className="my-2"></div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
+              loading
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                : "bg-primary text-white hover:bg-primary/90 hover:-translate-y-1 hover:shadow-primary/30"
+            }`}
+          >
+            {loading ? (
+              <AiOutlineLoading3Quarters className="animate-spin" />
+            ) : (
+              <>
+                Create Account <FaArrowRight className="opacity-80" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm font-medium text-gray-500">
+            Already registered?{" "}
+            <Link
+              href="/login"
+              className="text-primary hover:text-secondary font-bold transition-colors"
+            >
+              Login Here
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

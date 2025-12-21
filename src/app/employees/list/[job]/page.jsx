@@ -1,214 +1,360 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { addTask, getEmployeesListByJob, getProductsUnassigned } from '@/lib/api';
-import { toast } from 'react-toastify';
+"use client";
+import { useEffect, useState } from "react";
+import {
+  addTask,
+  getEmployeesListByJob,
+  getProductsUnassigned,
+} from "@/lib/api";
+import { toast } from "react-toastify";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import Link from 'next/link';
-import NoData from '@/components/NoData';
-import { useParams } from 'next/navigation';
+import Link from "next/link";
+import NoData from "@/components/NoData";
+import { useParams } from "next/navigation";
+import {
+  FaUser,
+  FaBoxOpen,
+  FaRupeeSign,
+  FaTimes,
+  FaCheck,
+  FaSearch,
+} from "react-icons/fa";
+import { MdWork, MdAssignmentAdd } from "react-icons/md";
+import { cn } from "@/lib/utilty/cn";
 
 export default function EmployeesListTaskBased() {
-    const params = useParams();
-    const job = params.job
-    const [employees, setEmployees] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [loadingProducts, setLoadingProducts] = useState(false);
-    const [loadingPage, setLoadingPage] = useState(true);
+  const params = useParams();
+  const job = params.job;
+  const [employees, setEmployees] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
 
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
-    const [pays, setPays] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  const [pays, setPays] = useState("");
 
-    const fetchProducts = async (pageNum = page, reset = false) => {
-        if (!hasMore || loadingProducts) return;
-        setLoadingProducts(true);
+  const fetchProducts = async (pageNum = page, reset = false) => {
+    if (!hasMore || loadingProducts) return;
+    setLoadingProducts(true);
 
-        try {
-            const res = await getProductsUnassigned(pageNum, job);
-            const { products: newProducts, hasMore: more } = res.data;
+    try {
+      const res = await getProductsUnassigned(pageNum, job);
+      const { products: newProducts, hasMore: more } = res.data;
 
-            setProducts(prev => reset ? newProducts : [...prev, ...newProducts]);
+      setProducts((prev) => (reset ? newProducts : [...prev, ...newProducts]));
 
-            setHasMore(more);
-            setPage(pageNum + 1);
-        } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.error || 'Failed to fetch', { theme: 'colored' });
-        } finally {
-            setLoadingProducts(false);
-        }
+      setHasMore(more);
+      setPage(pageNum + 1);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.error || "Failed to fetch", {
+        theme: "colored",
+      });
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const empRes = await getEmployeesListByJob(job);
+        setEmployees(empRes.data);
+
+        setHasMore(true);
+        await fetchProducts(1, true);
+      } catch (error) {
+        console.error(error);
+        toast.error(error.response?.data?.error || "Failed to fetch", {
+          theme: "colored",
+        });
+      } finally {
+        setLoadingPage(false);
+      }
     };
+    fetchData();
+  }, []);
 
+  const handleSelect = (e, empId) => {
+    const prodId = e.target.value;
+    if (!prodId) return;
 
-    useEffect(() => {
+    const prod = products.find((p) => p._id === prodId);
+    setSelectedProduct(prod);
+    setSelectedEmployeeId(empId);
+    setPays("");
+  };
 
-        const fetchData = async () => {
-            try {
-                const empRes = await getEmployeesListByJob(job);
-                setEmployees(empRes.data);
+  const handleAssign = async () => {
+    if (!selectedProduct || !pays || !selectedEmployeeId) {
+      return toast.error("Fill all fields before assigning");
+    }
 
-                setHasMore(true);
-                await fetchProducts(1, true);
-            } catch (error) {
-                console.error(error);
-                toast.error(error.response?.data?.error || 'Failed to fetch', { theme: 'colored' });
-            } finally {
-                setLoadingPage(false);
-            }
-        };
-        fetchData();
-    }, []);
+    try {
+      await addTask({
+        productId: selectedProduct._id,
+        employeeId: selectedEmployeeId,
+        pays: Number(pays),
+        job,
+      });
 
+      toast.success("Task assigned successfully!");
 
-    const handleSelect = (e, empId) => {
-        const prod = products.find(p => p._id === e.target.value);
-        setSelectedProduct(prod);
-        setSelectedEmployeeId(empId);
-        setPays('');
-    };
+      setSelectedProduct(null);
+      setSelectedEmployeeId(null);
+      setPays("");
 
-    const handleAssign = async () => {
-        if (!selectedProduct || !pays || !selectedEmployeeId) {
-            return toast.error('Fill all fields before assigning');
-        }
-
-        try {
-            await addTask({
-                productId: selectedProduct._id,
-                employeeId: selectedEmployeeId,
-                pays: Number(pays),
-                job
-            });
-
-            toast.success('Task assigned successfully!');
-
-            setSelectedProduct(null);
-            setSelectedEmployeeId(null);
-            setPays('');
-
-            if (hasMore) {
-                setProducts([]);
-                setHasMore(true);
-                setPage(1);
-                await fetchProducts(1, true);
-            } else {
-                setProducts(prev => prev.filter(p => p._id !== selectedProduct._id));
-            }
-
-        } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to assign task');
-            console.error(error);
-        }
-    };
-
-    const closeModal = () => {
-        setSelectedProduct(null);
-        setSelectedEmployeeId(null);
-        setPays('');
-    };
-
-    if (loadingPage || loadingProducts) {
-        return (
-            <p className='min-h-[calc(100vh-64px)] flex justify-center items-center'>
-                <AiOutlineLoading3Quarters className='animate-spin' />
-            </p>
+      if (hasMore) {
+        // If we have pagination, purely resetting might be safer to ensure consistency
+        setProducts([]);
+        setHasMore(true);
+        setPage(1);
+        await fetchProducts(1, true);
+      } else {
+        // Optimistic update if list is small enough
+        setProducts((prev) =>
+          prev.filter((p) => p._id !== selectedProduct._id)
         );
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Failed to assign task");
+      console.error(error);
     }
+  };
 
-    if (!loadingPage && !loadingProducts && (!employees || employees.length === 0)) {
-        return <NoData text={'No employees available'} />
-    }
+  const closeModal = () => {
+    setSelectedProduct(null);
+    setSelectedEmployeeId(null);
+    setPays("");
+  };
 
+  if (loadingPage) {
     return (
-        <>
-            <div className="py-8 max-w-3xl mx-auto w-full space-y-4 px-4">
-                <div className='text-2xl font-bold mb-4 capitalize'>
-                    {job} Employees List
+      <div className="min-h-[calc(100vh-64px)] flex justify-center items-center text-primary">
+        <AiOutlineLoading3Quarters className="animate-spin text-4xl" />
+      </div>
+    );
+  }
+
+  if (!loadingPage && (!employees || employees.length === 0)) {
+    return <NoData text={"No employees available"} />;
+  }
+
+  return (
+    <div className="min-h-full py-8 px-4 md:px-8 bg-background/30">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-neutral-100">
+          <div>
+            <h1 className="text-3xl font-bold text-text-dark capitalize flex items-center gap-3">
+              <MdWork className="text-primary" />
+              {job.replace("-", " ")}
+              <span className="text-muted-text text-lg font-normal">Tasks</span>
+            </h1>
+            <p className="text-muted-text mt-1">
+              Assign pending products to employees
+            </p>
+          </div>
+          {hasMore && (
+            <button
+              onClick={() => fetchProducts()}
+              disabled={loadingProducts}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm",
+                loadingProducts
+                  ? "bg-neutral-100 text-muted-text cursor-not-allowed"
+                  : "bg-surface border border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/40"
+              )}
+            >
+              {loadingProducts ? (
+                <AiOutlineLoading3Quarters className="animate-spin" />
+              ) : (
+                <FaBoxOpen />
+              )}
+              {loadingProducts ? "Loading..." : "Load More Products"}
+            </button>
+          )}
+        </div>
+
+        {/* Employee Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {employees.map((emp, index) => (
+            <div
+              key={emp._id}
+              className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 flex flex-col gap-4 group hover:shadow-md transition-all duration-300 hover:border-primary/20"
+            >
+              <div className="flex items-center gap-4 border-b border-neutral-50 pb-4">
+                <div className="w-12 h-12 rounded-full bg-secondary text-surface flex items-center justify-center font-bold text-lg shadow-sm">
+                  {emp.name.charAt(0).toUpperCase()}
                 </div>
-                {hasMore && (
-                    <div className="text-center mt-4">
-                        <button className="btn-secondary border-2 text-accent/80 p-1 font-semibold rounded-lg" onClick={() => fetchProducts()} disabled={loadingProducts}>
-                            {loadingProducts ? 'Loading...' : 'Get More Products'}
-                        </button>
-                    </div>
-                )}
-                {/* emp list */}
-                <ul className="space-y-4">
-                    {employees.map(emp => (
+                <div className="flex-1 min-w-0">
+                  <Link
+                    href={`/dashboard/task-based/${emp._id}`}
+                    className="text-lg font-bold text-text-dark hover:text-primary transition-colors truncate block"
+                  >
+                    {emp.name}
+                  </Link>
+                  <p className="text-xs text-muted-text uppercase tracking-wider font-semibold">
+                    {job.replace("-", " ")}
+                  </p>
+                </div>
+              </div>
 
-                        // single emp
-                        <li key={emp._id} className="flex flex-wrap justify-between items-center p-3 rounded-lg shadow bg-background text-text">
+              <div className="flex-1 flex flex-col gap-3">
+                <label className="text-sm font-semibold text-muted-text flex items-center gap-2">
+                  <FaBoxOpen className="text-primary/70" /> Assign Product
+                </label>
+                <div className="relative">
+                  <select
+                    onChange={(e) => handleSelect(e, emp._id)}
+                    value=""
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all appearance-none cursor-pointer text-text-dark"
+                  >
+                    <option value="" disabled>
+                      Select a product to assign
+                    </option>
+                    {products.length > 0 ? (
+                      products.map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.productId} —{" "}
+                          {new Date(p.createdAt).toLocaleDateString()}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No unassigned products</option>
+                    )}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-text">
+                    <FaSearch />
+                  </div>
+                </div>
+              </div>
 
-                            {/* emp name */}
-                            <Link href={`/dashboard/task-based/${emp._id}`} className="text-lg font-semibold capitalize block w-full py-2">
-                                {emp.name}
-                            </Link>
+              <Link
+                href={`/products/add/${emp._id}`}
+                className="w-full py-3 rounded-xl border border-dashed border-gray-300 text-muted-text hover:text-primary hover:border-primary hover:bg-primary/5 font-medium transition-all flex items-center justify-center gap-2 mt-2"
+              >
+                <MdAssignmentAdd />
+                Create Specific Task
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
 
-                            {/* product list */}
-                            <select
-                                onChange={(e) => handleSelect(e, emp._id)}
-                                value={selectedEmployeeId === emp._id && selectedProduct ? selectedProduct._id : ''}
-                                className="input-style"
-                            >
-                                <option value="">Select Product</option>
-                                {products.map(p => (
-                                    <option key={p._id} value={p._id}>
-                                        {p.productId} — {new Date(p.createdAt).toLocaleDateString()}
-                                    </option>
-                                ))}
-                            </select>
-
-                            {/* navigate to add product page */}
-                            <Link
-                                href={`/products/add/${emp._id}`}
-                                className='text-md font-semibold border-2 p-1.5 rounded-lg text-white '
-                            >
-                                Create Task
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+      {/* Assignment Modal */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-0 overflow-hidden scale-100 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="bg-secondary p-6 flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-1">
+                  Confirm Assignment
+                </h2>
+                <p className="text-white/60 text-sm">
+                  Assigning {selectedProduct.productId} to employee
+                </p>
+              </div>
+              <button
+                onClick={closeModal}
+                className="text-white/70 hover:text-white transition-colors p-1"
+              >
+                <FaTimes className="text-xl" />
+              </button>
             </div>
 
-            {/* Modal */}
-            {selectedProduct && (
-                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-10">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-                        <button onClick={closeModal} className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl">
-                            &times;
-                        </button>
-                        <h2 className="text-lg font-bold mb-2">Product Details</h2>
-                        <div className="space-y-1 text-sm">
-                            <p><strong>ID:</strong> {selectedProduct.productId}</p>
-                            <p><strong>Client:</strong> {selectedProduct.clientName}</p>
-                            <p><strong>Design No:</strong> {selectedProduct.designNumber}</p>
-                            <p><strong>Nails:</strong> {selectedProduct.nailsCount}</p>
-                            <p><strong>Kolukkulu:</strong> {selectedProduct.kolukkulu}</p>
-                            <p><strong>Varasalu:</strong> {selectedProduct.varasalu}</p>
-                            <p><strong>Repeat:</strong> {selectedProduct.repeat}</p>
-                            <p><strong>Sarees:</strong> {selectedProduct.numberOfSarees}</p>
-                            <p><strong>Winding Done:</strong> {selectedProduct.windingAssigned ? 'Yes' : 'No'}</p>
-                            <p><strong>Marking Done:</strong> {selectedProduct.markingAssigned ? 'Yes' : 'No'}</p>
-                            <p><strong>chittam Done:</strong> {selectedProduct.chittamAssigned ? 'Yes' : 'No'}</p>
-                            <p><strong>Created At:</strong> {new Date(selectedProduct.createdAt).toLocaleString()}</p>
-                        </div>
-
-                        <input
-                            type="number"
-                            className="input-style mt-3 w-full"
-                            placeholder="Enter Pays"
-                            value={pays}
-                            onChange={e => setPays(e.target.value)}
-                        />
-
-                        <button onClick={handleAssign} className="btn-primary w-full mt-3">
-                            Assign Task
-                        </button>
-                    </div>
+            <div className="p-6 space-y-6">
+              {/* Product Details Card */}
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-2">
+                <h3 className="text-sm font-bold text-muted-text uppercase tracking-wider mb-2">
+                  Product Details
+                </h3>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <p>
+                    <span className="text-gray-500">Client:</span>{" "}
+                    <span className="font-semibold text-gray-900">
+                      {selectedProduct.clientName}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-gray-500">Design No:</span>{" "}
+                    <span className="font-semibold text-gray-900">
+                      {selectedProduct.designNumber}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-gray-500">Sarees:</span>{" "}
+                    <span className="font-semibold text-gray-900">
+                      {selectedProduct.numberOfSarees}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-gray-500">Created:</span>{" "}
+                    <span className="font-semibold text-gray-900">
+                      {new Date(selectedProduct.createdAt).toLocaleDateString()}
+                    </span>
+                  </p>
                 </div>
-            )}
-        </>
-    );
+                <div className="pt-2 mt-2 border-t border-gray-200 flex flex-wrap gap-2">
+                  {selectedProduct.windingAssigned && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-medium">
+                      Winding Done
+                    </span>
+                  )}
+                  {selectedProduct.markingAssigned && (
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-md font-medium">
+                      Marking Done
+                    </span>
+                  )}
+                  {selectedProduct.chittamAssigned && (
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-md font-medium">
+                      Chittam Done
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Pays Input */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaRupeeSign className="text-primary" />
+                  Payment Amount
+                </label>
+                <input
+                  type="number"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg font-semibold"
+                  placeholder="Enter amount"
+                  value={pays}
+                  onChange={(e) => setPays(e.target.value)}
+                  autoFocus
+                />
+                <p className="text-xs text-gray-400 mt-2">
+                  Enter the amount to be paid for this task.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAssign}
+                  className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2"
+                >
+                  <FaCheck /> Confirm Assign
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

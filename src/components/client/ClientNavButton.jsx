@@ -10,7 +10,7 @@ const clientNav = [
 ];
 export default function ClientNavButton() {
     return (
-        <div className="space-y-4 p-5 w-full">
+        <div className="space-y-4 p-5">
 
             {clientNav.map((navBut) => (
                 <Link

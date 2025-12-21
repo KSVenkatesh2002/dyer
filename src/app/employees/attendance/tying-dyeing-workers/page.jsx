@@ -1,197 +1,291 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { markAttendance, employeeListPage } from '@/lib/api';
-import { toast } from 'react-toastify';
-import { MdAutorenew, MdEdit, MdClose } from 'react-icons/md';
-import Link from 'next/link';
-import dayjs from 'dayjs'
-import Skeleton from './loading';
-import NoData from '@/components/NoData';
+"use client";
+import { useEffect, useState } from "react";
+import { markAttendance, employeeListPage } from "@/lib/api";
+import { toast } from "react-toastify";
+import {
+  MdAutorenew,
+  MdEdit,
+  MdClose,
+  MdAdd,
+  MdCheckCircle,
+  MdCancel,
+  Mdtimelapse,
+  MdPerson,
+  MdWork,
+} from "react-icons/md";
+import Link from "next/link";
+import dayjs from "dayjs";
+import Skeleton from "./loading";
+import NoData from "@/components/NoData";
+import { cn } from "@/lib/utilty/cn";
+import Image from "next/image";
 
 export default function EmployeeListPage() {
-    const [employees, setEmployees] = useState(null);
-    const [attendanceMarkLoading, setAttendanceMarkLoading] = useState('');
-    const [editId, setEditId] = useState('')
-    const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState(null);
+  const [attendanceMarkLoading, setAttendanceMarkLoading] = useState("");
+  const [editId, setEditId] = useState("");
+  const [loading, setLoading] = useState(true);
 
-    const TODAY = dayjs().format('YYYY-MM-DD');
+  const TODAY = dayjs().format("YYYY-MM-DD");
 
-    const handleAttendanceChange = async (empId, status) => {
-        setEditId('')
-        if (attendanceMarkLoading !== '' && attendanceMarkLoading !== empId) {
-            toast.error('Attendance already marking', { theme: 'dark' });
-            return;
-        }
-        const previousStatus = employees.find(emp => emp._id === empId)?.attendanceStatus;
-        if (previousStatus === status) {
-            toast.info('Attendance already marked as ' + status, { theme: 'colored' });
-            return;
-        }
-        setAttendanceMarkLoading(empId);
-        try {
-            const res = await markAttendance({ employeeId: empId, status, date: TODAY, returnType: 'simple' });
-            const data = res.data;
-            if (data.updatedAttendance.status === status) {
-                toast.success('Attendance already marked as ' + status, { theme: 'dark' });
+  const handleAttendanceChange = async (empId, status) => {
+    setEditId("");
+    if (attendanceMarkLoading !== "" && attendanceMarkLoading !== empId) {
+      toast.error("Attendance already marking", { theme: "dark" });
+      return;
+    }
+    const previousStatus = employees.find(
+      (emp) => emp._id === empId
+    )?.attendanceStatus;
+    if (previousStatus === status) {
+      toast.info("Attendance already marked as " + status, {
+        theme: "colored",
+      });
+      return;
+    }
+    setAttendanceMarkLoading(empId);
+    try {
+      const res = await markAttendance({
+        employeeId: empId,
+        status,
+        date: TODAY,
+        returnType: "simple",
+      });
+      const data = res.data;
+      if (data.updatedAttendance.status === status) {
+        toast.success("Attendance marked: " + status, {
+          theme: "colored",
+          icon: <MdCheckCircle className="text-xl" />,
+        });
 
-                setEmployees(prev =>
-                    prev.map(emp =>
-                        emp._id === empId
-                            ? {
-                                ...emp,
-                                attendanceStatus: data.updatedAttendance.status,
-                                totalUnpaidAmount: data.totalUnpaidAmount,
-                                unpaidFullDays: data.unpaidFullDays,
-                                unpaidHalfDays: data.unpaidHalfDays,
-                                unpaidPartialAmount: data.unpaidPartialAmount,
-                                paid: data.updatedAttendance.paid
+        setEmployees((prev) =>
+          prev.map((emp) =>
+            emp._id === empId
+              ? {
+                  ...emp,
+                  attendanceStatus: data.updatedAttendance.status,
+                  totalUnpaidAmount: data.totalUnpaidAmount,
+                  unpaidFullDays: data.unpaidFullDays,
+                  unpaidHalfDays: data.unpaidHalfDays,
+                  unpaidPartialAmount: data.unpaidPartialAmount,
+                  paid: data.updatedAttendance.paid,
+                }
+              : emp
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error marking attendance:", error);
+      toast.error(
+        error.response?.data?.error || "Failed to mark attendance. Try again.",
+        { theme: "colored" }
+      );
+    } finally {
+      setTimeout(() => {
+        setAttendanceMarkLoading("");
+      }, 300);
+    }
+  };
 
-                            } : emp
+  useEffect(() => {
+    employeeListPage()
+      .then((res) => {
+        setEmployees(res.data);
+      })
+      .catch((err) => {
+        console.error("Error while fetch employee list page:", err);
+        toast.error(
+          err.response?.data?.error || "Failed to fetch employees. Try again.",
+          { theme: "colored" }
+        );
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-                    )
-                )
-
-            }
-        } catch (error) {
-            console.error('Error marking attendance:', error);
-            toast.error(error.response.data.error || 'Failed to mark attendance. Try again.', { theme: 'colored' });
-        } finally {
-            setTimeout(() => {
-                setAttendanceMarkLoading('');
-            }, 300);
-        }
+  const StatusButton = ({ status, currentStatus, onClick, disabled }) => {
+    const isSelected = currentStatus === status;
+    const colors = {
+      present: "bg-present text-white border-present",
+      half: "bg-half text-white border-half",
+      absent: "bg-absent text-white border-absent",
     };
-
-    useEffect(() => {
-        employeeListPage()
-            .then(res => {setEmployees(res.data)})
-            .catch(err => {
-                console.error('Error while fetch employee list page:', err);
-                toast.error(err.response?.data?.error || 'Failed to fetch employees. Try again.', { theme: 'colored' });
-            })
-        setLoading(false)
-    }, []);
-
-    if (loading) {
-        return <Skeleton />
-    }
-    if (!loading && (!employees || employees.length === 0)) {
-        return <NoData text={'No employees available'} />
-    }
-
+    const defaultColors =
+      "bg-white text-muted-text border-border hover:bg-gray-50";
 
     return (
-        <div className="p-1 max-w-3xl mx-auto w-full space-y-4 px-4">
-            {/* heading */}
-            <div className='flex flex-row items-baseline justify-between mb-4'>
-                <h2 className="text-2xl font-bold mb-4">Employee List</h2>
-
-                <p className="text-lg px-1.5 bg-accent/50 rounded-lg">{dayjs(TODAY).format('DD-MM-YYYY')}</p>
-            </div>
-
-
-            {/* employees list */}
-            <ul className="space-y-4">
-                {employees.map(emp => (
-
-                    // single employee
-                    <li key={emp._id} className="flex flex-col py-3 px-1.5 rounded-lg shadow-xl shadow-gray-400 gap-2 bg-background/50">
-
-                        {/* employee name and salary */}
-                        <div className='flex justify-end items-stretch gap-2 w-full'>
-                            {/* employee name */}
-                            <a
-                                href={`/dashboard/time-based/${emp._id}`}
-                                // onClick={()=>handleClick(`/employees/${emp._id}`)}
-                                className='flex flex-row items-center gap-2 grow'
-                            >
-                                <div className='text-lg font-semibold  capitalize'>
-                                    <p>{emp.name}<span className='text-xs font-normal'> {emp.job}</span></p>
-                                    <p className='text-xs font-normal'>(₹{emp.salaryPerDay}/day)</p>
-                                </div>
-
-                            </a>
-
-                            {/* days count */}
-                            <div className="relative bg-primary/50 px-5 text-text p-1 rounded-md flex flex-col items-center">
-                                <div className='flex items-center gap-2'>
-                                    <p className='bg-green-500 size-5 rounded-full'></p>
-                                    {emp.unpaidFullDays || 0}</div>
-
-                                <div className='flex items-center gap-2 '>
-                                    <p className='bg-half size-5 rounded-full'></p>
-                                    {emp.unpaidHalfDays || 0}
-                                </div>
-                            </div>
-
-                            {/* salary */}
-                            <p className='bg-primary/50 px-5 rounded-md p-1 flex flex-col items-center justify-center'>
-                                ₹{emp.totalUnpaidAmount || 0}
-                            </p>
-                        </div>
-
-                        <div className='w-full flex justify-around items-center'>
-
-                            {/* Show loading spinner when attendance is being marked */}
-                            {attendanceMarkLoading === emp._id ? (
-                                <p className={`w-full border rounded-md p-1 cursor-default text-center bg-slate-600 text-white`}>
-                                    <MdAutorenew />
-                                </p>
-                            ) : emp.attendanceStatus && editId != emp._id ? (
-                                // Show attendance status and edit icon
-                                <div className='space-x-2 w-full flex items-center'>
-                                    <p
-                                        className={`w-full py-2 flex items-center justify-center space-x-1 border border-border rounded-md  cursor-default text-center capitalize ${emp.attendanceStatus === 'present'
-                                            ? 'bg-green-600 text-white'
-                                            : emp.attendanceStatus === 'absent'
-                                                ? 'bg-red-600 text-white'
-                                                : emp.attendanceStatus === 'half' && 'bg-yellow-500 text-black'
-                                            }`}
-                                    >
-                                        <span>{emp.attendanceStatus}</span>
-                                        {emp.paid && <span className=' text-black uppercase tracking-wide font-semibold'> [paid] </span>}
-
-                                    </p>
-                                    {!emp.paid && <MdEdit onClick={() => { setEditId(emp._id) }} className="text-2xl" />}
-
-                                </div>
-                            ) : (
-                                <ol className='flex items-center justify-between w-full gap-2'>
-                                    {editId === emp._id && <li><p>EDITING</p></li>}
-
-                                    {['present', 'half', 'absent'].map(status => (
-                                        <li
-                                            key={status}
-                                            className={`${editId === emp._id ? 'w-1/4' : 'w-[30%]'} h-8 border border-border rounded-md flex justify-center items-center cursor-pointer text-white ${status === 'present'
-                                                ? 'bg-green-500'
-                                                : status === 'half'
-                                                    ? 'bg-yellow-500'
-                                                    : status === 'absent' && 'bg-red-600'
-                                                }`}
-                                            onClick={() => handleAttendanceChange(emp._id, status)}
-                                        >
-                                            <span className="capitalize">{status}</span>
-                                        </li>
-
-                                    ))}
-                                    {editId === emp._id && <MdClose onClick={() => { setEditId('') }} className="text-2xl" />}
-                                </ol>
-                            )}
-
-                            {/* Edit employee button */}
-                        </div>
-                    </li>
-
-                ))}
-            </ul>
-
-            {/* add employee button */}
-            <Link href="/employees/add" className='block w-full'>
-                <div className={` p-6 bg-accent/80 text-center text-lg rounded-2xl shadow-xl shadow-gray-400`}>
-                    Add Employee +
-                </div>
-            </Link>
-
-        </div>
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={cn(
+          "flex-1 py-1.5 px-2 rounded-lg border text-sm font-semibold capitalize transition-all duration-200",
+          isSelected ? colors[status] : defaultColors,
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
+      >
+        {status}
+      </button>
     );
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto w-full px-4 py-6 space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-neutral-100">
+        <div>
+          <h2 className="text-3xl font-bold text-text-dark">Attendance</h2>
+          <p className="text-muted-text text-sm mt-1">
+            Manage daily attendance for Tying / Dyeing workers
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="px-4 py-2 bg-primary/10 text-primary rounded-xl font-bold text-lg border border-primary/20">
+            {dayjs(TODAY).format("DD MMM YYYY")}
+          </div>
+          <Link href="/employees/add">
+            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-text rounded-xl font-medium shadow-md hover:bg-primary/90 transition-all hover:shadow-lg">
+              <MdAdd className="text-xl" />
+              <span className="hidden sm:inline">Add Employee</span>
+              <Image src={"/image/service/add_employees.png"} alt="add employees" width={20} height={20}/>
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {loading ? (
+        <Skeleton />
+      ) : !loading && (!employees || employees.length === 0) ? (
+        <NoData text={"No employees found"} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {employees.map((emp) => (
+            <div
+              key={emp._id}
+              className="bg-white rounded-2xl shadow-sm border border-neutral-100 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col"
+            >
+              {/* Card Header: Info */}
+              <div className="p-5 flex items-start justify-between border-b border-neutral-50 bg-neutral-50/50">
+                <Link
+                  href={`/dashboard/time-based/${emp._id}`}
+                  className="flex items-center gap-3 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary text-xl font-bold border-2 border-white shadow-sm group-hover:border-primary/50 transition-colors">
+                    {emp.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-text-dark group-hover:text-primary transition-colors">
+                      {emp.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-text font-medium uppercase tracking-wide">
+                      <MdWork className="text-primary" />
+                      {emp.job}
+                    </div>
+                  </div>
+                </Link>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-text-dark">
+                    ₹{emp.salaryPerDay}
+                  </div>
+                  <div className="text-[10px] text-muted-text font-medium uppercase">
+                    / Day
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Body: Stats */}
+              <div className="p-5 grid grid-cols-2 gap-4">
+                <div className="bg-success/10 rounded-xl p-3 flex flex-col items-center justify-center border border-success/20">
+                  <span className="text-xs text-muted-text font-bold uppercase mb-1">
+                    Full Days
+                  </span>
+                  <span className="text-xl font-bold text-present">
+                    {emp.unpaidFullDays || 0}
+                  </span>
+                </div>
+                <div className="bg-warning/10 rounded-xl p-3 flex flex-col items-center justify-center border border-warning/20">
+                  <span className="text-xs text-muted-text font-bold uppercase mb-1">
+                    Half Days
+                  </span>
+                  <span className="text-xl font-bold text-half">
+                    {emp.unpaidHalfDays || 0}
+                  </span>
+                </div>
+                <div className="col-span-2 bg-primary/5 rounded-xl p-3 flex items-center justify-between border border-primary/10 px-4">
+                  <span className="text-xs font-bold text-secondary uppercase">
+                    Unpaid Total
+                  </span>
+                  <span className="text-lg font-bold text-primary">
+                    ₹{emp.totalUnpaidAmount || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Footer: Actions */}
+              <div className="p-4 mt-auto border-t border-neutral-100 bg-white">
+                {attendanceMarkLoading === emp._id ? (
+                  <div className="w-full py-2 bg-neutral-100 rounded-xl animate-pulse flex items-center justify-center text-muted-text">
+                    <MdAutorenew className="animate-spin mr-2" /> Marking...
+                  </div>
+                ) : emp.attendanceStatus && editId !== emp._id ? (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        "flex-1 py-2 rounded-xl text-center text-sm font-bold capitalize flex items-center justify-center gap-2 shadow-sm",
+                        emp.attendanceStatus === "present"
+                          ? "bg-present text-white"
+                          : emp.attendanceStatus === "absent"
+                          ? "bg-absent text-white"
+                          : "bg-half text-white"
+                      )}
+                    >
+                      {emp.attendanceStatus}
+                      {emp.paid && (
+                        <span className="bg-black/20 text-white text-[10px] px-1.5 py-0.5 rounded ml-1">
+                          PAID
+                        </span>
+                      )}
+                    </div>
+                    {!emp.paid && (
+                      <button
+                        onClick={() => setEditId(emp._id)}
+                        className="p-2 text-muted-text hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                        title="Edit Attendance"
+                      >
+                        <MdEdit className="text-xl" />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 animate-in fade-in zoom-in duration-200">
+                    <StatusButton
+                      status="present"
+                      currentStatus={emp.attendanceStatus}
+                      onClick={() => handleAttendanceChange(emp._id, "present")}
+                    />
+                    <StatusButton
+                      status="half"
+                      currentStatus={emp.attendanceStatus}
+                      onClick={() => handleAttendanceChange(emp._id, "half")}
+                    />
+                    <StatusButton
+                      status="absent"
+                      currentStatus={emp.attendanceStatus}
+                      onClick={() => handleAttendanceChange(emp._id, "absent")}
+                    />
+                    {editId === emp._id && (
+                      <button
+                        onClick={() => setEditId("")}
+                        className="p-1.5 text-muted-text hover:text-error rounded-full hover:bg-error/10 transition-colors"
+                      >
+                        <MdClose />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

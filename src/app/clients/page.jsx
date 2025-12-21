@@ -1,5 +1,5 @@
-import ClientNavButton from '@/app/clients/components/ClientNavButton'
-import ClientListPage from '@/app/clients/components/ClientList'
+import ClientNavButton from '@/components/client/ClientNavButton'
+import ClientListPage from '@/components/client/ClientList'
 import React from 'react'
 
 const page = () => {

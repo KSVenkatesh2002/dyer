@@ -13,36 +13,36 @@ export default function ClientListPage() {
 
 
     const toggleClientActive = async (clientId, status) => {
-    if (editId !== '') return;
-    setEditId(clientId);
+        if (editId !== '') return;
+        setEditId(clientId);
 
-    try {
-        await changeActive(clientId);
+        try {
+            await changeActive(clientId);
 
-        setClients(prev => {
-            const updated = prev.map(client =>
-                client._id === clientId
-                    ? { ...client, isActive: !status }
-                    : client
-            );
+            setClients(prev => {
+                const updated = prev.map(client =>
+                    client._id === clientId
+                        ? { ...client, isActive: !status }
+                        : client
+                );
 
-            // 🔽 Sort by isActive (true first) then by name (A–Z)
-            return updated.sort((a, b) => {
-                if (b.isActive - a.isActive !== 0) {
-                    return b.isActive - a.isActive; // true first
-                }
-                return a.name.localeCompare(b.name); // then name A–Z
+                // 🔽 Sort by isActive (true first) then by name (A–Z)
+                return updated.sort((a, b) => {
+                    if (b.isActive - a.isActive !== 0) {
+                        return b.isActive - a.isActive; // true first
+                    }
+                    return a.name.localeCompare(b.name); // then name A–Z
+                });
             });
-        });
-    } catch (error) {
-        console.error('Error marking attendance:', error);
-        toast.error(error.response?.data?.error || 'Failed to change active.', { theme: 'colored' });
-    } finally {
-        setTimeout(() => {
-            setEditId('');
-        }, 300);
-    }
-};
+        } catch (error) {
+            console.error('Error marking attendance:', error);
+            toast.error(error.response?.data?.error || 'Failed to change active.', { theme: 'colored' });
+        } finally {
+            setTimeout(() => {
+                setEditId('');
+            }, 300);
+        }
+    };
 
 
     useEffect(() => {
@@ -68,7 +68,7 @@ export default function ClientListPage() {
     }
 
     return (
-        <div className="p-1 max-w-3xl mx-auto w-full space-y-4 px-4">
+        <div className="p-1 max-w-3xl mx-auto  space-y-4 px-4">
             {/* heading */}
             <div className='flex flex-row items-baseline justify-between mb-4 text-2xl font-bold'>
                 Client List

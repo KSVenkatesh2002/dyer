@@ -1,32 +1,40 @@
 // app/layout.js
 
-import './globals.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Header from '@/components/Header';
-import { ClerkProvider } from '@clerk/nextjs';
-
-
+import "@/styles/globals.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import SideBar from "@/components/layout/SideBar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
-    title: 'Dyer Working Log',
-    description: 'Track employee work, attendance, and salary',
+  title: "Dyer Working Log",
+  description: "Track employee work, attendance, and salary",
+  icons: {
+    icon: "/fav_icon/favicon-16x16.png",
+    icon: [
+      { url: "/fav_icon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/fav_icon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/fav_icon/site.webmanifest",
+  },
 };
 
 export default async function RootLayout({ children }) {
-    return (
-        <ClerkProvider>
-            <html lang="en">
-                <body className=" bg-surface/40 text-text  mx-auto">
-                    <Header />
-
-                    <main className=" min-h-[calc(100vh-64px)] max-w-7xl mx-auto">
-                        {children}
-                    </main>
-                    <ToastContainer position="top-right" autoClose={2000} />
-                </body>
-            </html>
-        </ClerkProvider>
-    );
+  return (
+    <ClerkProvider>
+      <html lang="en">
+        <body className="bg-surface text-text-dark min-h-screen  ">
+          <Header/>
+          <div className="min-h-[calc(100vh-120px)] flex justify-between">
+            <SideBar className="md:min-w-[200px] md:max-w-[200px] md:w-[200px]" />
+            <div className="w-full">{children}</div>
+          </div>
+          <ToastContainer position="top-right" autoClose={2000} />
+          <Footer />
+        </body>
+      </html>
+    </ClerkProvider>
+  );
 }
-

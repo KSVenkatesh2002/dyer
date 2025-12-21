@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #be8f41;
+  --color-secondary: #3c2c12;
+
+  /* Base */
+  --color-background: #e9dcc7;
+  --color-surface: #f9efe0;
+
+  /* Accent & Actions */
+  --color-accent: #36605e;
+  --color-link: #6c5dd3;
+
+  /* Attendance Status */
+  --color-present: #4caf50;
+  --color-absent: #f26c6c;
+  --color-half: #f4b740;
+  --color-holiday: #4b7be5;
+
+  /* Text */
+  --color-text: #ffffff;
+  --color-text-dark: #3c2c12;
+  --color-muted-text: #8a8fb9;
+
+  /* Borders */
+  --color-border: #e2e4f4;
+  --color-light-border: #8a8fb8;
+
+  /* States */
+  --color-disabled: #c7c9e3;
+  --color-error: #ffe1e1;
+  --color-success: #e4f7ec;
+  --color-warning: #fff1d6;
+  --color-info: #e7e9ff;
+}
