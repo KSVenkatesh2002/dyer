@@ -26,9 +26,9 @@ export default async function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en">
         <body className="bg-surface text-text-dark min-h-screen  ">
-          <Header/>
+          <Header />
           <div className="min-h-[calc(100vh-120px)] flex justify-between">
-            <SideBar className="md:min-w-[200px] md:max-w-[200px] md:w-[200px]" />
+            <SideBar className="md:min-w-[250px] md:max-w-[250px] md:w-[250px]" />
             <div className="w-full">{children}</div>
           </div>
           <ToastContainer position="top-right" autoClose={2000} />

@@ -1,22 +1,31 @@
 "use client";
-import React, {useMemo} from "react";
+import React, { useMemo } from "react";
 import { workItems, otherActions } from "@/data/services";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utilty/cn";
 import Link from "next/link";
 import Image from "next/image";
 
-const NOT_SHOW_ROUTES = ["/dashboard", "/login", "/register", "/onboarding", "/"]
+const NOT_SHOW_ROUTES = [
+  "/dashboard",
+  "/login",
+  "/register",
+  "/onboarding",
+  "/",
+];
 
 export default function SideBar({ className = "" }) {
-  const pathName = usePathname()
-  const isActive = useMemo(() => NOT_SHOW_ROUTES.includes(pathName), [pathName])
-  if(isActive) return null
+  const pathName = usePathname();
+  const isActive = useMemo(
+    () => NOT_SHOW_ROUTES.includes(pathName),
+    [pathName]
+  );
+  if (isActive) return null;
   return (
     <aside
       className={cn(
         "flex flex-col  gap-6 bg-secondary min-h-[calc(100vh-75px)] sticky top-0 overflow-y-auto no-scrollbar border-r border-white/5",
-        "w-[80px] md:w-[280px] p-1 md:p-4 transition-all duration-300",
+        "p-1 md:p-4 transition-all duration-300",
         className
       )}
     >
@@ -60,7 +69,7 @@ export default function SideBar({ className = "" }) {
 
 const NavItem = ({ item }) => {
   const pathname = usePathname();
-  const isActive = useMemo(() => pathname === item.href, [pathname])
+  const isActive = useMemo(() => pathname === item.href, [pathname]);
   return (
     <Link
       href={item.href}

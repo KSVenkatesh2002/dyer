@@ -58,8 +58,6 @@ export default function LoginForm() {
 
   if (!isLoaded) return null;
 
-
-
   return (
     <div className="min-h-[calc(100vh-64px)] bg-secondary/5 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl shadow-gray-200/50 p-8 md:p-10 border border-white/50">
@@ -103,6 +101,7 @@ export default function LoginForm() {
             name="identifier"
             placeholder="e.g. user@example.com"
             icon={FaEnvelope}
+            handleChange={handleChange}
           />
 
           <InputGroup
@@ -111,6 +110,7 @@ export default function LoginForm() {
             type="password"
             placeholder="••••••••"
             icon={FaLock}
+            handleChange={handleChange}
           />
 
           <button
@@ -148,26 +148,27 @@ export default function LoginForm() {
   );
 }
 
-  const InputGroup = ({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    icon: Icon,
-  }) => (
-    <div className="space-y-2">
-      <label className="text-sm font-bold text-gray-700 ml-1">{label}</label>
-      <div className="relative group">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">
-          <Icon />
-        </div>
-        <input
-          type={type}
-          name={name}
-          onChange={handleChange}
-          className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 font-medium text-gray-700 placeholder:text-gray-400"
-          placeholder={placeholder}
-        />
+const InputGroup = ({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  icon: Icon,
+  handleChange,
+}) => (
+  <div className="space-y-2">
+    <label className="text-sm font-bold text-gray-700 ml-1">{label}</label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">
+        <Icon />
       </div>
+      <input
+        type={type}
+        name={name}
+        onChange={handleChange}
+        className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 font-medium text-gray-700 placeholder:text-gray-400"
+        placeholder={placeholder}
+      />
     </div>
-  );
+  </div>
+);
