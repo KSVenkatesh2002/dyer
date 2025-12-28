@@ -48,7 +48,7 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-6">Support (coming)</h4>
+            <h4 className="text-lg font-semibold text-white mb-6">Support</h4>
             <ul className="space-y-3 text-sm">
               <FooterLink href="/help">Help Center</FooterLink>
               <FooterLink href="/documentation">Documentation</FooterLink>
@@ -80,9 +80,14 @@ const Footer = () => {
                 <span>kotavenkatesh2002@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-surface/80">
-                <Link href="venkatesh-k-s.vercel.app">
+                <a
+                  href="https://venkatesh-k-s.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors hover:underline"
+                >
                   <span>Check My Portfolio</span>
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

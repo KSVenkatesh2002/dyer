@@ -110,9 +110,12 @@ export default function LandingPage() {
               Enter Workspace{" "}
               <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="px-8 py-4 bg-white border-2 border-transparent hover:border-primary/10 text-text-dark font-bold rounded-2xl shadow-lg shadow-gray-200/50 hover:shadow-xl hover:bg-gray-50 transition-all w-full sm:w-auto">
+            <Link
+              href="/how-it-works"
+              className="px-8 py-4 bg-white border-2 border-transparent hover:border-primary/10 text-text-dark font-bold rounded-2xl shadow-lg shadow-gray-200/50 hover:shadow-xl hover:bg-gray-50 transition-all w-full sm:w-auto text-center"
+            >
               How it works
-            </button>
+            </Link>
           </div>
         </section>
 

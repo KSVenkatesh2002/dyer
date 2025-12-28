@@ -7,11 +7,17 @@ import Link from "next/link";
 import Image from "next/image";
 
 const NOT_SHOW_ROUTES = [
+  "/how-it-works",
   "/dashboard",
   "/login",
   "/register",
   "/onboarding",
   "/",
+  "/help",
+  "/documentation",
+  "/privacy",
+  "/terms",
+  "/support",
 ];
 
 export default function SideBar({ className = "" }) {
