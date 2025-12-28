@@ -37,7 +37,7 @@ export default function AddClientPage() {
     setLoading(true);
     try {
       await createClient(form);
-      // toast.success('Client added successfully!');
+      // toast.success("Client added successfully!");
       setForm({
         name: "",
         phone: "",

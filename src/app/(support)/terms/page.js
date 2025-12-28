@@ -27,8 +27,8 @@ export default function TermsOfService() {
             </h2>
             <p className="text-muted-text mb-4">
               Permission is granted to temporarily download one copy of the
-              materials (information or software) on Dyer Handloom's website for
-              personal, non-commercial transitory viewing only.
+              materials (information or software) on Dyer Handloom&apos;s
+              website for personal, non-commercial transitory viewing only.
             </p>
             <ul className="list-disc pl-5 text-muted-text space-y-2">
               <li>Modify or copy the materials;</li>
@@ -42,11 +42,11 @@ export default function TermsOfService() {
               3. Disclaimer
             </h2>
             <p className="text-muted-text">
-              The materials on Dyer Handloom's website are provided on an 'as
-              is' basis. Dyer Handloom makes no warranties, expressed or
-              implied, and hereby disclaims and negates all other warranties
-              including, without limitation, implied warranties or conditions of
-              merchantability.
+              The materials on Dyer Handloom&apos;s website are provided on an
+              &apos;as is&apos; basis. Dyer Handloom makes no warranties,
+              expressed or implied, and hereby disclaims and negates all other
+              warranties including, without limitation, implied warranties or
+              conditions of merchantability.
             </p>
           </section>
 
@@ -58,7 +58,7 @@ export default function TermsOfService() {
               In no event shall Dyer Handloom or its suppliers be liable for any
               damages (including, without limitation, damages for loss of data
               or profit, or due to business interruption) arising out of the use
-              or inability to use the materials on Dyer Handloom's website.
+              or inability to use the materials on Dyer Handloom&apos;s website.
             </p>
           </section>
         </div>
